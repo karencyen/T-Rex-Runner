@@ -55,6 +55,7 @@
 #include "Random.h"
 #include "TExaS.h"
 #include "ADC.h"
+#include "SysTick.c"
 
 
 void DisableInterrupts(void); // Disable interrupts
