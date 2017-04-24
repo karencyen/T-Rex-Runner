@@ -14,3 +14,9 @@ void ADC_Init(void);
 // Output: 12-bit result of ADC conversion
 uint32_t ADC_In(void);
 
+
+//-----Port E Initialization-----
+void PortE_Init(void);
+
+//-----SysTick Initialization-----
+void SysTick_Init(void);

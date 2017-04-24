@@ -62,6 +62,21 @@ void DisableInterrupts(void); // Disable interrupts
 void EnableInterrupts(void);  // Enable interrupts
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 
+uint32_t Data;
+
+// *************************** Debug ***************************
+
+void PortF_Init(void){
+	unsigned long delayF = 0;
+	SYSCTL_RCGC2_R |= 0x21; 
+	delayF = 10000;
+	GPIO_PORTF_AMSEL_R &= ~0x0E;      // no analog
+  GPIO_PORTF_PCTL_R &= ~0x0000FFF0; // regular GPIO function
+  GPIO_PORTF_DIR_R |= 0x0E;      // make PB2-0 out
+  GPIO_PORTF_AFSEL_R &= ~0x0E;   // disable alt funct on PB2-0
+  GPIO_PORTF_DEN_R |= 0x0E;      // enable digital I/O on PB2-0
+}
+
 
 // *************************** Images ***************************
 // enemy ship that starts at the top of the screen (arms/mouth closed)
@@ -185,43 +200,46 @@ const unsigned short Bunker0[] = {
 
 };
 
-
+void SysTick_Handler(void){
+	ADC_In();
+}
 
 // *************************** Capture image dimensions out of BMP**********
 
 int main(void){
   TExaS_Init();  // set system clock to 80 MHz
+	//DisableInterrupts(); 
+	//SysTick_Init();
+	ST7735_InitR(INITR_REDTAB); 
   Random_Init(1);
+	
 
   Output_Init();
-  ST7735_FillScreen(0x0000);            // set screen to black
+  ST7735_FillScreen(31);            // set screen to black
   
-  ST7735_DrawBitmap(52, 159, PlayerShip0, 18,8); // player ship middle bottom
-  ST7735_DrawBitmap(53, 151, Bunker0, 18,5);
-
-  ST7735_DrawBitmap(0, 9, SmallEnemy10pointA, 16,10);
-  ST7735_DrawBitmap(20,9, SmallEnemy10pointB, 16,10);
-  ST7735_DrawBitmap(40, 9, SmallEnemy20pointA, 16,10);
-  ST7735_DrawBitmap(60, 9, SmallEnemy20pointB, 16,10);
-  ST7735_DrawBitmap(80, 9, SmallEnemy30pointA, 16,10);
-  ST7735_DrawBitmap(100, 9, SmallEnemy30pointB, 16,10);
-
-
+// ST7735_DrawBitmap(52, 159, PlayerShip0, 18,8); // player ship middle bottom
+	
   Delay100ms(50);              // delay 5 sec at 80 MHz
 
-
-  ST7735_FillScreen(0x0000);            // set screen to black
-  ST7735_SetCursor(1, 1);
-  ST7735_OutString("GAME OVER");
-  ST7735_SetCursor(1, 2);
-  ST7735_OutString("Nice try,");
-  ST7735_SetCursor(1, 3);
-  ST7735_OutString("Earthling!");
-  ST7735_SetCursor(2, 4);
-  LCD_OutDec(1234);
+//  ST7735_FillScreen(0x0000);            // set screen to black
+//  ST7735_SetCursor(1, 1);
+//  ST7735_OutString("GAME OVER");
+//  ST7735_SetCursor(1, 2);
+//  ST7735_OutString("Nice try,");
+//  ST7735_SetCursor(1, 3);
+//  ST7735_OutString("Earthling!");
+//  ST7735_SetCursor(2, 4);
+//  LCD_OutDec(1234);
+	
+	PortE_Init();
+	ADC_Init();
+	EnableInterrupts();
+	
   while(1){
+		ST7735_DrawBitmap(Data, 5, SmallEnemy20pointB, 20, 20);
   }
 
+	
 }
 
 
