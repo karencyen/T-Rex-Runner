@@ -1,6 +1,6 @@
 ; LCD.s
-; Student names: change this to your names or look very silly
-; Last modification date: change this to the last modification date or look very silly
+; Student names: Karen Yen, Harini Cherupalla
+; Last modification date: 4/11/17
 
 ; Runs on LM4F120/TM4C123
 ; Use SSI0 to send an 8-bit code to the ST7735 160x128 pixel LCD.
@@ -19,12 +19,15 @@
 ; VCC (pin 2) connected to +3.3 V
 ; Gnd (pin 1) connected to ground
 
-GPIO_PORTA_DATA_R       EQU   0x400043FC
+DC                      EQU   0x40004100
+DC_COMMAND              EQU   0
+DC_DATA                 EQU   0x40
 SSI0_DR_R               EQU   0x40008008
 SSI0_SR_R               EQU   0x4000800C
 SSI_SR_RNE              EQU   0x00000004  ; SSI Receive FIFO Not Empty
 SSI_SR_BSY              EQU   0x00000010  ; SSI Busy Bit
 SSI_SR_TNF              EQU   0x00000002  ; SSI Transmit FIFO Not Full
+GPIO_PORTA_DATA_R		EQU   0X400043FC
 
       EXPORT   writecommand
       EXPORT   writedata
@@ -56,15 +59,26 @@ SSI_SR_TNF              EQU   0x00000002  ; SSI Transmit FIFO Not Full
 ; Output: none
 ; Assumes: SSI0 and port A have already been initialized and enabled
 writecommand
-;1) Read SSI0_SR_R and check bit 4, 
-;2) If bit 4 is high, loop back to step 1 (wait for BUSY bit to be low)
-;3) Clear D/C=PA6 to zero
-;4) Write the command to SSI0_DR_R
-;5) Read SSI0_SR_R and check bit 4, 
-;6) If bit 4 is high, loop back to step 5 (wait for BUSY bit to be low)
-
-    
-    
+;; --UUU-- Code to write a command to the LCD
+	;;PUSH{R4, LR}
+	LDR R1,=SSI0_SR_R			;1) Read SSI0_SR_R and check bit 4, 
+	LDR R2, [R1]
+	AND R2, #0x10
+	CMP R2, #0x10
+	BEQ writecommand			;2) If bit 4 is high, loop back to step 1 (wait for BUSY bit to be low)
+	LDR R1,=DC					;3) Clear D/C=PA6 to zero
+	LDR R2, [R1]
+	BIC R2, #0x40
+	STR R2, [R1]
+	LDR R1,=SSI0_DR_R			;4) Write the command to SSI0_DR_R
+	STR R0, [R1]
+N5	LDR R1,=SSI0_SR_R			;5) Read SSI0_SR_R and check bit 4, 
+	LDR R2, [R1]
+	AND R2, #0x10
+	CMP R2, #0x10
+	BEQ N5						;6) If bit 4 is high, loop back to step 5 (wait for BUSY bit to be low)
+	;;POP{R4, LR}
+	
     BX  LR                          ;   return
 
 ; This is a helper function that sends an 8-bit data to the LCD.
@@ -72,12 +86,18 @@ writecommand
 ; Output: none
 ; Assumes: SSI0 and port A have already been initialized and enabled
 writedata
-;1) Read SSI0_SR_R and check bit 1, 
-;2) If bit 1 is low loop back to step 1 (wait for TNF bit to be high)
-;3) Set D/C=PA6 to one
-;4) Write the 8-bit data to SSI0_DR_R
-
-    
+;; --UUU-- Code to write data to the LCD
+	LDR R1,=SSI0_SR_R			;1) Read SSI0_SR_R and check bit 1, 
+	LDR R2, [R1]
+	AND R2, #0x02
+	CMP R2, #0x02
+	BNE writedata				;2) If bit 1 is low loop back to step 1 (wait for TNF bit to be high)
+	LDR R1,=DC					;3) Clear D/C=PA6 to one
+	LDR R2, [R1]
+	ORR R2, #0x40
+	STR R2, [R1]
+	LDR R1,=SSI0_DR_R			;4) Write the 8-bit data to SSI0_DR_R
+	STR R0, [R1]
     
     BX  LR                          ;   return
 
