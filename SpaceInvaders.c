@@ -518,7 +518,7 @@ int Jump(void){
 //		timer--;
 //	}
 		if ((GPIO_PORTE_DATA_R &0x01) == 0x01){
-		jumpingTime = 50;
+		jumpingTime = 20;
 		return 1;
 		}
 		else{
@@ -565,7 +565,7 @@ int main(void){
 	PortE_Init();
 	ADC_Init();
 	EnableInterrupts();
-	uint32_t Data;
+	uint32_t Data = 50;;
 	uint16_t runFlag = 0;
 	uint16_t yC = 180;
 	ST7735_DrawBitmap(0, 27, Start, 24, 30);
@@ -586,16 +586,16 @@ int main(void){
 		if(runFlag < 100){
 			if(Duck()==1) {
 				if(clear == 1){
-					ST7735_FillRect(Data, 25, 50, 50, 0xFFFF);
+					ST7735_FillRect(60, Data, 50, 50, 0xFFFF);
 				}
-				ST7735_DrawBitmap(Data, 25, Duck1, 16, 30);
+				ST7735_DrawBitmap(60, Data, Duck1, 16, 30);
 				clear = 0;
 				
 //				ST7735_DrawBitmap(Data, 25, Run1, 26, 30);
 //				clear = 1;
 			}
 			else if((Jump() == 1) || jumpingTime >0){
-				jumpHeight =  10 -0.05*(y*(y-50));
+				jumpHeight = -0.05*(y*(y-50));
 				ST7735_DrawBitmap(jumpHeight, 25, Run1, 26, 30);
 				y++;
 				jumpingTime--;
@@ -604,7 +604,7 @@ int main(void){
 				}
 			}
 			else{
-				ST7735_DrawBitmap(Data, 25, Run1, 26, 30);
+				ST7735_DrawBitmap(60, Data, Run1, 26, 30);
 				clear = 1;
 			}
 //			if(Jump() == 
@@ -616,23 +616,23 @@ int main(void){
 					DinoCoordinateY = 25;
 				}
 				else{
-					DinoCoordinateX = Data;
-					DinoCoordinateY = 25;
+					DinoCoordinateX = 60;
+					DinoCoordinateY = Data;
 				}
 		}
 		else{
 			if(Duck()==1) {
 				if(clear == 1){
-					ST7735_FillRect(Data, 25, 50, 50, 0xFFFF);
+					ST7735_FillRect(60, Data, 50, 50, 0xFFFF);
 				}
-				ST7735_DrawBitmap(Data, 25, Duck2, 16, 30);
+				ST7735_DrawBitmap(60, Data, Duck2, 16, 30);
 				clear = 0;
 				
 //				ST7735_DrawBitmap(Data, 25, Run1, 26, 30);
 //				clear = 1;
 			}
 			else if((Jump() == 1) || jumpingTime >0){
-				jumpHeight =  10 -0.05*(y*(y-50));
+				jumpHeight =  -0.05*(y*(y-50));
 				ST7735_DrawBitmap(jumpHeight, 25, Run2, 26, 30);
 				y++;
 				jumpingTime--;
@@ -641,7 +641,7 @@ int main(void){
 				}
 			}
 			else{
-				ST7735_DrawBitmap(Data, 25, Run2, 26, 30);
+				ST7735_DrawBitmap(60, Data, Run2, 26, 30);
 				clear = 1;
 			}
 			ST7735_DrawBitmap(50, 120, Duck2, 16, 30);
@@ -650,8 +650,8 @@ int main(void){
 					DinoCoordinateY = 25;
 				}
 				else{
-					DinoCoordinateX = Data;
-					DinoCoordinateY = 25;
+					DinoCoordinateX = 60;
+					DinoCoordinateY = Data;
 				}
 				if(runFlag > 200){
 					runFlag = 0;
