@@ -466,19 +466,19 @@ uint32_t checkHitbox(uint32_t dimensionX, uint32_t coordinateX, uint32_t dimensi
 	uint32_t rangeMaxX;
 	uint32_t ObstacleMinX;
 	uint32_t ObstacleMaxX;
-	rangeMinX = coordinateX+1;
-	rangeMaxX = coordinateX + dimensionX-1;
-	ObstacleMinX = Stage[currentStage].Obstacle1CoordX+1;
-	ObstacleMaxX = Stage[currentStage].Obstacle1CoordX + Stage[currentStage].Obstacle1dimenX-1;
+	rangeMinX = coordinateX+2;
+	rangeMaxX = coordinateX + dimensionX-2;
+	ObstacleMinX = Stage[currentStage].Obstacle1CoordX+2;
+	ObstacleMaxX = Stage[currentStage].Obstacle1CoordX + Stage[currentStage].Obstacle1dimenX-2;
 	
 	uint32_t rangeMaxY;
 	uint32_t rangeMinY;
 	uint32_t ObstacleMaxY;
 	uint32_t ObstacleMinY;
-	rangeMaxY = coordinateY-1;
-	rangeMinY = coordinateY - dimensionY+1;
-	ObstacleMaxY = Stage[currentStage].Obstacle1CoordY-1;
-	ObstacleMinY = Stage[currentStage].Obstacle1CoordY - Stage[currentStage].Obstacle1dimenY+1;
+	rangeMaxY = coordinateY-2;
+	rangeMinY = coordinateY - dimensionY+2;
+	ObstacleMaxY = Stage[currentStage].Obstacle1CoordY-2;
+	ObstacleMinY = Stage[currentStage].Obstacle1CoordY - Stage[currentStage].Obstacle1dimenY+2;
 	
 	if( ((rangeMinY>=ObstacleMinY && rangeMinY<=ObstacleMaxY) || (rangeMaxY<= ObstacleMaxY && rangeMaxY >= ObstacleMinY))  &&   ((rangeMinX>=ObstacleMinX && rangeMinX<=ObstacleMaxX) || (rangeMaxX<= ObstacleMaxX && rangeMaxX >= ObstacleMinX))){  
 		return 1;
@@ -505,19 +505,19 @@ uint32_t checkHitbox(uint32_t dimensionX, uint32_t coordinateX, uint32_t dimensi
 //		
 //	}
 //}
+int y = 0;
+void Jump(void){
+	if ((GPIO_PORTE_DATA_R &0x01) == 0x01){
+		Data = 20+ 0.1*(y*(y-50)); 
+		y++;
+	}
+}
 
-//void Jump(void){
-//	int y = 0;
-//	if ((GPIO_PORTE_DATA_R &0x01) == 0x01){
-//		ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY+0.1*(y*(y-50)), SmallEnemy10pointA, 16, 10);  
-//		y++;
-//	}
-//}
-//void Duck(void){
-//	if ((GPIO_PORTE_DATA_R &0x02) == 0x02){
-//		ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, SmallEnemy10pointA, 16, 10);
-//	}
-//}
+void Duck(void){
+	if ((GPIO_PORTE_DATA_R &0x02) == 0x02){
+
+	}
+}
 
 
 
@@ -556,9 +556,12 @@ int main(void){
   int i = 0;
 	int j = 0;
 	int k = 0;
-	while(1){
+	while(1 && k ==0
+		){
 		Data = ADC_In();
 		Data = Data/26;
+		Jump();
+				
 		if(runFlag < 100){
 			ST7735_DrawBitmap(Data, 25, Run1, 26, 30); //26 by 30 pixels is the right size
 			ST7735_DrawBitmap(50, 120, Duck1, 16, 30);
@@ -591,7 +594,7 @@ int main(void){
 			}
 			i++;
 			j++;
-}
+	}
 }
 
 // You can use this timer only if you learn how it works
