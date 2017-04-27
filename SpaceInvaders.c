@@ -63,6 +63,7 @@ void EnableInterrupts(void);  // Enable interrupts
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 
 uint32_t Data;
+int jumpingTime = 0;
 
 //////////////////////////
 uint32_t currentStage = 0;
@@ -505,17 +506,33 @@ uint32_t checkHitbox(uint32_t dimensionX, uint32_t coordinateX, uint32_t dimensi
 //		
 //	}
 //}
-int y = 0;
-void Jump(void){
-	if ((GPIO_PORTE_DATA_R &0x01) == 0x01){
-		Data = 20+ 0.1*(y*(y-50)); 
-		y++;
-	}
+
+int Jump(void){
+//	int timer;
+//	if ((GPIO_PORTE_DATA_R &0x01) == 0x01){
+//		timer = 100;
+//	}
+//	if(timer >0){
+//		Data = 20+ 0.1*(y*(y-50)); 
+//		y++;
+//		timer--;
+//	}
+		if ((GPIO_PORTE_DATA_R &0x01) == 0x01){
+		jumpingTime = 50;
+		return 1;
+		}
+		else{
+			return 0;
+		}
 }
 
-void Duck(void){
+int Duck(void){
+	int timer;
 	if ((GPIO_PORTE_DATA_R &0x02) == 0x02){
-
+		return 1;
+	}
+	else{
+		return 0;
 	}
 }
 
@@ -550,12 +567,16 @@ int main(void){
 	EnableInterrupts();
 	uint32_t Data;
 	uint16_t runFlag = 0;
-	uint16_t yC = 129;
+	uint16_t yC = 180;
 	ST7735_DrawBitmap(0, 27, Start, 24, 30);
 	ST7735_DrawBitmap(158, 115, Dead, 26, 30);
   int i = 0;
 	int j = 0;
 	int k = 0;
+	int y = 0;
+	int clear;
+	int slowCactus=0x00;
+	int jumpHeight;
 	while(1 && k ==0
 		){
 		Data = ADC_In();
@@ -563,29 +584,92 @@ int main(void){
 		Jump();
 				
 		if(runFlag < 100){
-			ST7735_DrawBitmap(Data, 25, Run1, 26, 30); //26 by 30 pixels is the right size
+			if(Duck()==1) {
+				if(clear == 1){
+					ST7735_FillRect(Data, 25, 50, 50, 0xFFFF);
+				}
+				ST7735_DrawBitmap(Data, 25, Duck1, 16, 30);
+				clear = 0;
+				
+//				ST7735_DrawBitmap(Data, 25, Run1, 26, 30);
+//				clear = 1;
+			}
+			else if((Jump() == 1) || jumpingTime >0){
+				jumpHeight =  10 -0.05*(y*(y-50));
+				ST7735_DrawBitmap(jumpHeight, 25, Run1, 26, 30);
+				y++;
+				jumpingTime--;
+				if(jumpingTime == 0){
+					y = 0;
+				}
+			}
+			else{
+				ST7735_DrawBitmap(Data, 25, Run1, 26, 30);
+				clear = 1;
+			}
+//			if(Jump() == 
+
 			ST7735_DrawBitmap(50, 120, Duck1, 16, 30);
 			runFlag++;
-			DinoCoordinateX = Data;
-			DinoCoordinateY = 25;
-			
+				if((Jump() == 1) || jumpingTime >0){
+					DinoCoordinateX = jumpHeight;
+					DinoCoordinateY = 25;
+				}
+				else{
+					DinoCoordinateX = Data;
+					DinoCoordinateY = 25;
+				}
 		}
 		else{
-			ST7735_DrawBitmap(Data, 25, Run2, 26, 30); //26 by 30 pixels is the right size
+			if(Duck()==1) {
+				if(clear == 1){
+					ST7735_FillRect(Data, 25, 50, 50, 0xFFFF);
+				}
+				ST7735_DrawBitmap(Data, 25, Duck2, 16, 30);
+				clear = 0;
+				
+//				ST7735_DrawBitmap(Data, 25, Run1, 26, 30);
+//				clear = 1;
+			}
+			else if((Jump() == 1) || jumpingTime >0){
+				jumpHeight =  10 -0.05*(y*(y-50));
+				ST7735_DrawBitmap(jumpHeight, 25, Run2, 26, 30);
+				y++;
+				jumpingTime--;
+				if(jumpingTime == 0){
+					y = 0;
+				}
+			}
+			else{
+				ST7735_DrawBitmap(Data, 25, Run2, 26, 30);
+				clear = 1;
+			}
 			ST7735_DrawBitmap(50, 120, Duck2, 16, 30);
-			ST7735_DrawBitmap(0, yC, Cactus, 30, 24);
-			Stage[currentStage].Obstacle1CoordX = 0;
-			Stage[currentStage].Obstacle1CoordY = yC;
-			yC--;
-			DinoCoordinateX = Data;
-			DinoCoordinateY = 25;
+			if((Jump() == 1) || jumpingTime >0){
+					DinoCoordinateX = jumpHeight;
+					DinoCoordinateY = 25;
+				}
+				else{
+					DinoCoordinateX = Data;
+					DinoCoordinateY = 25;
+				}
 				if(runFlag > 200){
 					runFlag = 0;
-					yC = 129;
 				}
 			runFlag++;
 
 		}
+			ST7735_DrawBitmap(0, yC, Cactus, 30, 24);
+			Stage[currentStage].Obstacle1CoordX = 0;
+			Stage[currentStage].Obstacle1CoordY = yC;
+			slowCactus ^=0x01;
+			if(slowCactus == 0x01)
+			{
+				yC--;
+			}
+			if(yC ==0){
+					yC = 180;
+			}
 			if (checkHitbox(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
 				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
 				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Cactus, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY); 

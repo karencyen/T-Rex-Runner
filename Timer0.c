@@ -22,10 +22,13 @@
  http://users.ece.utexas.edu/~valvano/
  */
 #include <stdint.h>
-
+#include "ST7735.h"
 #include "tm4c123gh6pm.h"
 
 void (*PeriodicTask0)(void);   // user function
+
+
+
 
 // ***************** Timer0_Init ****************
 // Activate TIMER0 interrupts to run user task periodically
@@ -48,8 +51,18 @@ void Timer0_Init(void(*task)(void), uint32_t period){
   NVIC_EN0_R = 1<<19;           // 9) enable IRQ 19 in NVIC
   TIMER0_CTL_R = 0x00000001;    // 10) enable TIMER0A
 }
+int run = 0;
+extern uint32_t Data;
 
 void Timer0A_Handler(void){
   TIMER0_ICR_R = TIMER_ICR_TATOCINT;// acknowledge TIMER0A timeout
-  (*PeriodicTask0)();                // execute user task
+//	if(run == 0){
+//		ST7735_DrawBitmap(Data, 25, SmallEnemy10pointA, 16, 10);
+//		run = 1;
+//	}
+//	else if(run == 1){
+//		ST7735_FillRect(Data, 25, 16, 10, 0xFFFF);
+//		run = 0;
+//	}
+//  (*PeriodicTask0)();                // execute user task
 }
