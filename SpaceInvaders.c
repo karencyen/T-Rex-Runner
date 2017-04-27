@@ -64,6 +64,56 @@ void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 
 uint32_t Data;
 
+//////////////////////////
+uint32_t currentStage = 0;
+
+uint32_t DinoDimensionX = 26;
+uint32_t DinoDimensionY = 30;
+uint32_t DinoCoordinateX;
+uint32_t DinoCoordinateY;
+
+uint32_t Obstacle1DimensionX = 16;
+uint32_t Obstacle1DimensionY = 10;
+
+uint32_t Obstacle2DimensionX;
+uint32_t Obstacle2DimensionY;
+
+uint32_t ObstacleCoordinateX;
+uint32_t ObstacleCoordinateY;
+
+uint32_t FireballDimensionX = 16;
+uint32_t FireballDimensionY = 10;
+
+uint32_t FireballCoordinateX;
+uint32_t FireballCoordinateY;
+
+
+
+struct Obstacle{
+	uint8_t Obstacle1dimenX;
+	uint8_t Obstacle1dimenY;
+	uint8_t Obstacle1CoordX;
+	uint8_t Obstacle1CoordY;
+	uint8_t Obstacle2dimenX;
+	uint8_t Obstacle2dimenY;
+	uint8_t Obstacle2CoordX;
+	uint8_t Obstacle2CoordY;
+};
+
+
+typedef struct Obstacle STyp;
+#define groundFlag 0
+#define waterFlag 1
+#define airFlag 2
+#define fireFlag 3
+
+STyp Stage[4] = {
+	{30, 24, 0, 129, 16, 10, 40, 159}, //earth
+	{16, 10, 80, 120, 16, 10, 80, 159}, //water
+	{16, 10, 80, 120, 16, 10, 80, 159}, //air
+	{16, 10, 80, 120, 16, 10, 80, 159}, //fire
+	
+};
 // *************************** Debug ***************************
 
 void PortF_Init(void){
@@ -409,8 +459,65 @@ const unsigned short Cactus[] = {
 
 };
 
+///////////
 
+uint32_t checkHitbox(uint32_t dimensionX, uint32_t coordinateX, uint32_t dimensionY, uint32_t coordinateY){
+	uint32_t rangeMinX;
+	uint32_t rangeMaxX;
+	uint32_t ObstacleMinX;
+	uint32_t ObstacleMaxX;
+	rangeMinX = coordinateX+1;
+	rangeMaxX = coordinateX + dimensionX-1;
+	ObstacleMinX = Stage[currentStage].Obstacle1CoordX+1;
+	ObstacleMaxX = Stage[currentStage].Obstacle1CoordX + Stage[currentStage].Obstacle1dimenX-1;
+	
+	uint32_t rangeMaxY;
+	uint32_t rangeMinY;
+	uint32_t ObstacleMaxY;
+	uint32_t ObstacleMinY;
+	rangeMaxY = coordinateY-1;
+	rangeMinY = coordinateY - dimensionY+1;
+	ObstacleMaxY = Stage[currentStage].Obstacle1CoordY-1;
+	ObstacleMinY = Stage[currentStage].Obstacle1CoordY - Stage[currentStage].Obstacle1dimenY+1;
+	
+	if( ((rangeMinY>=ObstacleMinY && rangeMinY<=ObstacleMaxY) || (rangeMaxY<= ObstacleMaxY && rangeMaxY >= ObstacleMinY))  &&   ((rangeMinX>=ObstacleMinX && rangeMinX<=ObstacleMaxX) || (rangeMaxX<= ObstacleMaxX && rangeMaxX >= ObstacleMinX))){  
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
 
+///////
+//void fireballHit(void){
+//	int w = 7;
+//	if (checkHitbox(FireballDimensionX, FireballCoordinateX, FireballDimensionY, FireballCoordinateY) == 1){
+//			while(w>0){
+//				ST7735_DrawBitmap(FireballDimensionX, FireballCoordinateX, SmallEnemy10pointA, FireballDimensionY, FireballCoordinateY); 
+//				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, SmallEnemy10pointA, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
+//			}
+//			
+//	}
+//}
+
+//void ObstacleHit(void){
+//	if (checkHitbox(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+//		
+//	}
+//}
+
+//void Jump(void){
+//	int y = 0;
+//	if ((GPIO_PORTE_DATA_R &0x01) == 0x01){
+//		ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY+0.1*(y*(y-50)), SmallEnemy10pointA, 16, 10);  
+//		y++;
+//	}
+//}
+//void Duck(void){
+//	if ((GPIO_PORTE_DATA_R &0x02) == 0x02){
+//		ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, SmallEnemy10pointA, 16, 10);
+//	}
+//}
 
 
 
@@ -446,7 +553,9 @@ int main(void){
 	uint16_t yC = 129;
 	ST7735_DrawBitmap(0, 27, Start, 24, 30);
 	ST7735_DrawBitmap(158, 115, Dead, 26, 30);
-  
+  int i = 0;
+	int j = 0;
+	int k = 0;
 	while(1){
 		Data = ADC_In();
 		Data = Data/26;
@@ -454,18 +563,34 @@ int main(void){
 			ST7735_DrawBitmap(Data, 25, Run1, 26, 30); //26 by 30 pixels is the right size
 			ST7735_DrawBitmap(50, 120, Duck1, 16, 30);
 			runFlag++;
+			DinoCoordinateX = Data;
+			DinoCoordinateY = 25;
+			
 		}
 		else{
 			ST7735_DrawBitmap(Data, 25, Run2, 26, 30); //26 by 30 pixels is the right size
 			ST7735_DrawBitmap(50, 120, Duck2, 16, 30);
 			ST7735_DrawBitmap(0, yC, Cactus, 30, 24);
+			Stage[currentStage].Obstacle1CoordX = 0;
+			Stage[currentStage].Obstacle1CoordY = yC;
 			yC--;
+			DinoCoordinateX = Data;
+			DinoCoordinateY = 25;
 				if(runFlag > 200){
 					runFlag = 0;
 					yC = 129;
 				}
 			runFlag++;
+
 		}
+			if (checkHitbox(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
+				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Cactus, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY); 
+				ST7735_OutString("GAME OVER");
+				k = 1;
+			}
+			i++;
+			j++;
 }
 }
 
