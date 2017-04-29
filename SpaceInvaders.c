@@ -115,10 +115,10 @@ typedef struct Obstacle STyp;
 #define fireFlag 3
 
 STyp Stage[4] = {
-	{30, 24, 0, 129, 16, 10, 40, 159}, //earth
-	{16, 10, 80, 120, 16, 10, 80, 159}, //air
+	{26, 15, 0, 129, 14, 20, 20, 159}, //earth
+	{30, 17, 0, 129, 19, 24, 40, 159}, //air
 	{30, 17, 0, 129, 19, 24, 40, 159}, //water
-	{16, 10, 80, 120, 16, 10, 80, 159}, //fire
+	{30, 17, 0, 129, 19, 24, 40, 159}, //fire
 	
 };
 // *************************** Debug ***************************
@@ -409,8 +409,8 @@ const unsigned short Dead[] = {
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
-//26x15
-const unsigned short Cactus[] = {
+//26x15 const
+ unsigned short Cactus[] = {
 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xDEFB, 0xBDD7, 0xBDF7, 0xBDF7, 0xBDF7, 0xBDF7, 0xBDD7, 0xCE79, 0xFFFF, 0xFFFF,
@@ -494,7 +494,7 @@ const unsigned short IconF[] = {
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
-const unsigned short Pterodactyl[] = {
+ unsigned short Pterodactyl[] = {
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
  0xFFFF, 0x7BEF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x528A, 0x8410,
@@ -574,7 +574,7 @@ const unsigned short Ash[] = {
 };
 
 //19x24
-const unsigned short Fish[] = {
+ unsigned short Fish[] = {
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -606,7 +606,7 @@ const unsigned short Fish[] = {
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 //30x17
-const unsigned short Seaweed[] = {
+ unsigned short Seaweed[] = {
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -952,9 +952,46 @@ void DuckAndErase(void){
 	int slowCactus=0x00;
 	int slowPter = 0x00;
 int ObstaclePick = 0;
-void Obstacle(void){
+//void Obstacle(void){
+//	if (ObstaclePick == 0){
+//		ST7735_DrawBitmap(0, yC, Cactus, 26, 15);
+//		Stage[currentStage].Obstacle1CoordX = 0;
+//		Stage[currentStage].Obstacle1CoordY = yC;
+//		slowCactus ^=0x01;
+//		if(slowCactus == 0x01)
+//		{
+//			yC--;
+//		}
+//		if(yC ==0){
+//				yC = 180;
+//			ObstaclePick = Random();
+//			ObstaclePick &= 0x01;
+//		}
+//	}
+//	else if (ObstaclePick == 1){
+//		ST7735_DrawBitmap(50, yP, Pterodactyl, 14, 20);
+//		Stage[currentStage].Obstacle2CoordX = 0;
+//		Stage[currentStage].Obstacle2CoordY = yP;
+//		slowPter ^=0x01;
+//		if(slowPter == 0x01)
+//		{
+//			yP--;
+//		}
+//		if(yP ==0){
+//				yP = 180;
+//			ObstaclePick = Random();
+//			ObstaclePick &= 0x01;
+//		}
+//	}
+//}
+
+
+//--------------------------------------------
+
+
+void Obstacle(unsigned short *pt1, unsigned short *pt2){
 	if (ObstaclePick == 0){
-		ST7735_DrawBitmap(0, yC, Cactus, 26, 15);
+		ST7735_DrawBitmap(0, yC, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
 		Stage[currentStage].Obstacle1CoordX = 0;
 		Stage[currentStage].Obstacle1CoordY = yC;
 		slowCactus ^=0x01;
@@ -969,7 +1006,7 @@ void Obstacle(void){
 		}
 	}
 	else if (ObstaclePick == 1){
-		ST7735_DrawBitmap(50, yP, Pterodactyl, 14, 20);
+		ST7735_DrawBitmap(50, yP, pt2, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
 		Stage[currentStage].Obstacle2CoordX = 0;
 		Stage[currentStage].Obstacle2CoordY = yP;
 		slowPter ^=0x01;
@@ -983,6 +1020,28 @@ void Obstacle(void){
 			ObstaclePick &= 0x01;
 		}
 	}
+}
+
+unsigned short * ObstacleP1(void){
+	unsigned short *obstaclePt;
+	if(currentStage == groundFlag){
+		obstaclePt = Cactus;
+	}
+	else{
+		obstaclePt = Seaweed;
+	}
+	return obstaclePt;
+}
+
+unsigned short * ObstacleP2(void){
+	unsigned short *obstaclePt;
+	if(currentStage == groundFlag){
+		obstaclePt = Pterodactyl;
+	}
+	else{
+		obstaclePt = Fish;
+	}
+	return obstaclePt;
 }
 
 //---------------------------Time--------------------------------------
@@ -1203,7 +1262,8 @@ int main(void){
 //					yC = 180;
 //			}
 //////////////////////////////////////
-				Obstacle();
+//				Obstacle();
+			Obstacle(ObstacleP1(), ObstacleP2());
 //			if (checkHitbox(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
 //				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
 //				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Cactus, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY); 
