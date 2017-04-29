@@ -56,6 +56,7 @@ extern uint32_t Data;
 
 void Timer0A_Handler(void){
   TIMER0_ICR_R = TIMER_ICR_TATOCINT;// acknowledge TIMER0A timeout
+	(*PeriodicTask0)();
 //	if(run == 0){
 //		ST7735_DrawBitmap(Data, 25, SmallEnemy10pointA, 16, 10);
 //		run = 1;

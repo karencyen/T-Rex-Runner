@@ -55,7 +55,7 @@
 #include "Random.h"
 #include "TExaS.h"
 #include "ADC.h"
-
+#include "Timer0.h"
 
 
 void DisableInterrupts(void); // Disable interrupts
@@ -930,7 +930,7 @@ int jumpingChecker(void){
 
 int eraseJ = 1;
 void JumpAndErase(void){
-	if ((jumpingChecker() == 1) && (eraseJ == 1)){
+	if ((jumpingChecker() == 1) && (eraseJ == 1)&&(jumpingTime==50)){
 		ST7735_FillRect(DinoCoordinateX, DinoCoordinateY, DinoDimensionX, DinoDimensionY, 0x00);
 		eraseJ = 0;
 	}
@@ -1037,6 +1037,32 @@ void Obstacle(void){
 }
 //}
 //------------------------------------------------------------------------
+uint32_t tellTime;
+void Score(void){
+	
+	ST7735_SetCursor(19, 14);
+	ST7735_OutUDec(tellTime);
+	tellTime++;
+
+	
+}
+
+uint16_t timePer = 0;
+uint32_t n = 1;
+uint8_t CheckTime(void){
+	
+	timePer = tellTime/n;
+	
+	if(timePer == 5){
+			currentStage++;
+			n++;
+			if(currentStage == 3){
+				currentStage = 0;
+			}
+	}
+	
+	return currentStage;
+}
 
 //void moveDelay(int delayer, int moveCoord, int lengthOfDelay){
 //	delayer--;
@@ -1063,6 +1089,7 @@ int main(void){
   ST7735_FillScreen(0xFFFF);            // set screen to white
   Delay100ms(50);              // delay 5 sec at 80 MHz
   LCD_OutDec(1234);
+	Timer0_Init(&Score, 0x4C4B400);
 	
 	PortE_Init();
 	ADC_Init();
