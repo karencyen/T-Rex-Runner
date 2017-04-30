@@ -1144,12 +1144,13 @@ unsigned short * ObstacleP2(void){
 //---------------------------Time--------------------------------------
 uint32_t tellTime;
 void Score(void){
-	
-	ST7735_SetCursor(19, 14);
+	ST7735_SetRotation(1);
+	ST7735_FillRect(45, 10, 128, 8, 0xFFFF);
+	ST7735_SetCursor(1, 1);
+	ST7735_OutString("SCORE: ");
 	ST7735_OutUDec(tellTime);
-	tellTime++;
-
-	
+	tellTime++;	
+	ST7735_SetRotation(0);
 }
 
 uint16_t timePer = 0;
