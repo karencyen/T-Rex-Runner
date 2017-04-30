@@ -59,4 +59,9 @@ void SysTick_Init(void){
   NVIC_ST_CTRL_R = 0x007;	
 }
 
+//-------------------------------------------
+void SysTick_Handler(void){
+	ADC_In();
+}
+
 

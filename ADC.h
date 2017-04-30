@@ -20,3 +20,5 @@ void PortE_Init(void);
 
 //-----SysTick Initialization-----
 void SysTick_Init(void);
+
+void SysTick_Handler(void);
