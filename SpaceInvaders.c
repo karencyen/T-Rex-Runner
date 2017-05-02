@@ -77,7 +77,7 @@ int jumpFlag;
 	
 int flo = 0;
 //////////////////////////
-uint32_t currentStage = 0;
+uint32_t currentStage = 3;
 
 uint32_t DinoDimensionX = 26;
 uint32_t DinoDimensionY = 30;
@@ -111,6 +111,10 @@ struct Obstacle{
 	uint8_t Obstacle2dimenY;
 	uint8_t Obstacle2CoordX;
 	uint8_t Obstacle2CoordY;
+	uint8_t Obstacle3dimenX;
+	uint8_t Obstacle3dimenY;
+	uint8_t Obstacle3CoordX;
+	uint8_t Obstacle3CoordY;
 };
 
 
@@ -121,10 +125,10 @@ typedef struct Obstacle STyp;
 #define fireFlag 3
 
 STyp Stage[4] = {
-	{26, 15, 0, 180, 14, 20, 15, 180}, //earth cactus pter
-	{22, 22, 0, 60, 14, 20, 0, 120}, //air cloud pter
-	{23, 14, 0, 180, 19, 24, 50, 180}, //water seaweed fish
-	{26, 15, 0, 180, 14, 20, 50, 180}, //fire
+	{26, 15, 0, 180,    14, 20, 15, 180}, //earth cactus pter
+	{22, 22, 0, 60,    14, 20, 0, 120}, //air cloud pter
+	{23, 14, 0, 180,    19, 24, 50, 180}, //water seaweed fish
+	{26, 15, 0, 180,    10, 15, 100, 180,   10, 15, 140, 70}, //fire
 	
 };
 // *************************** Debug ***************************
@@ -835,6 +839,34 @@ uint32_t checkHitbox2(uint32_t dimensionX, uint32_t coordinateX, uint32_t dimens
 	}
 }
 
+
+uint32_t checkHitbox3(uint32_t dimensionX, uint32_t coordinateX, uint32_t dimensionY, uint32_t coordinateY){
+	uint32_t rangeMinX;
+	uint32_t rangeMaxX;
+	uint32_t ObstacleMinX;
+	uint32_t ObstacleMaxX;
+	rangeMinX = coordinateX+3;
+	rangeMaxX = coordinateX + dimensionX-3;
+	ObstacleMinX = Stage[currentStage].Obstacle3CoordX+3;
+	ObstacleMaxX = Stage[currentStage].Obstacle3CoordX + Stage[currentStage].Obstacle3dimenX-3;
+	
+	uint32_t rangeMaxY;
+	uint32_t rangeMinY;
+	uint32_t ObstacleMaxY;
+	uint32_t ObstacleMinY;
+	rangeMaxY = coordinateY-3;
+	rangeMinY = coordinateY - dimensionY+3;
+	ObstacleMaxY = Stage[currentStage].Obstacle3CoordY-3;
+	ObstacleMinY = Stage[currentStage].Obstacle3CoordY - Stage[currentStage].Obstacle3dimenY+3;
+	
+	if( ((rangeMinY>=ObstacleMinY && rangeMinY<=ObstacleMaxY) || (rangeMaxY<= ObstacleMaxY && rangeMaxY >= ObstacleMinY))  &&   ((rangeMinX>=ObstacleMinX && rangeMinX<=ObstacleMaxX) || (rangeMaxX<= ObstacleMaxX && rangeMaxX >= ObstacleMinX))){  
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
+
 //---------------------------Fireball-----------------------------------
 int wait=0;
 int numberOfFireballs = 0;
@@ -1299,6 +1331,7 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 	}
 //	}
 	}
+	//=========
 	
 		if(currentStage == airFlag){
 	//if (ObstaclePick == 0){
@@ -1366,6 +1399,8 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 		}
 	//}
 	}
+		
+	
 }
 
 
@@ -1408,13 +1443,124 @@ unsigned short * ObstacleP2(void){
 		obstaclePt = Pterodactyl;
 	}
 
-//	else{ //if(currentStage == waterFlag){
-//		obstaclePt = Fish;
-//	}
-
 	return obstaclePt;
 }
 
+int yFire1 = 0;
+int yFire2 = 0;
+int yFire3 = 0;
+
+int xFire1 = 0;
+int xFire2 = 0;
+int xFire3 = 0;
+
+int firePick1 = 0;
+int firePick2 = 0;
+
+int temp1Xf;
+int temp1Yf;
+
+int temp2Xf;
+int temp2Yf;
+
+int tempExplode1;
+int tempExplode2;
+
+void obstacleFire(void){
+		if(currentStage == fireFlag){
+	//if (ObstaclePick == 0){
+		Stage[currentStage].Obstacle1CoordX = xFire1;
+		Stage[currentStage].Obstacle1CoordY = yFire1;
+		if(firePick1 == 0){
+			Stage[currentStage].Obstacle1CoordY = 40;
+			Stage[currentStage].Obstacle1CoordX = 120;
+		}
+		if(firePick1 == 1){
+			Stage[currentStage].Obstacle1CoordY = 90;
+			Stage[currentStage].Obstacle1CoordX = 120;
+		}
+		if(firePick1 == 2){
+			Stage[currentStage].Obstacle1CoordY = 140;
+			Stage[currentStage].Obstacle1CoordX = 120;
+		}
+		if(firePick1 == 3){
+			Stage[currentStage].Obstacle1CoordY = 180;
+			Stage[currentStage].Obstacle1CoordX = 90;
+		}
+		ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Fireball, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
+		slowCactus ^=0x01;
+	//	if(slowCactus == 0x01)
+		if(positionFlag%3== 0)
+		{
+			xFire1--;
+			yFire1--;
+		}
+		if((xFire1 == 0) || (yFire1 == 0)){
+				yFire1 = 0;
+			//ST7735_DrawBitmap(tempX, tempY, Ash, 24, 26);
+//			ObstaclePick = Random();
+//			ObstaclePick &= 0x01;
+			temp1Xf =Stage[currentStage].Obstacle1CoordX;
+			temp1Yf =Stage[currentStage].Obstacle1CoordY;
+			Stage[currentStage].Obstacle1CoordX = yFire1;
+			Stage[currentStage].Obstacle1CoordY = 60;
+			firePick1 = Random();
+			firePick1 &= 0x03;
+			tempExplode1 = 15;
+		}
+		
+		if(tempExplode1 > 0){
+			ST7735_DrawBitmap(temp1Xf, temp1Yf, Ash, 24, 26);
+			tempExplode1--;
+		}
+	//}//----------------------------------------------------------------------------------------
+	//else if (ObstaclePick == 1){
+		Stage[currentStage].Obstacle2CoordX = xFire2;
+		Stage[currentStage].Obstacle2CoordY = yFire2;
+		if(firePick2 == 0){
+			Stage[currentStage].Obstacle2CoordY = 60;
+			Stage[currentStage].Obstacle2CoordX = 120;
+		}
+		if(firePick2 == 1){
+			Stage[currentStage].Obstacle2CoordY = 110;
+			Stage[currentStage].Obstacle2CoordX = 120;
+		}
+		if(firePick2 == 2){
+			Stage[currentStage].Obstacle2CoordY = 160;
+			Stage[currentStage].Obstacle2CoordX = 120;
+		}
+		if(firePick2 == 3){
+			Stage[currentStage].Obstacle2CoordY = 180;
+			Stage[currentStage].Obstacle2CoordX = 40;
+		}
+		ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, Fireball, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
+		slowPter ^=0x01;
+//		if(slowPter == 0x01)
+			if(positionFlag%2 == 0)
+		{
+			yFire2--;
+			xFire2--;
+		}
+		if((yFire2 == 0) || (xFire2 == 0)){
+			ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, Ash, 24, 26);
+				yFire2 = 0;
+//			ObstaclePick = Random();
+//			ObstaclePick &= 0x01;
+			temp2Xf =Stage[currentStage].Obstacle1CoordX;
+			temp2Yf =Stage[currentStage].Obstacle1CoordY;
+			Stage[currentStage].Obstacle2CoordX = yFire2;
+			Stage[currentStage].Obstacle2CoordY = xFire2;
+			airPick2 = Random();
+			airPick2 &= 0x03;
+			tempExplode2 = 15;
+		}
+		if(tempExplode2 > 0){
+			ST7735_DrawBitmap(temp2Xf, temp2Yf, Ash, 24, 26);
+			tempExplode2--;
+		}
+	//}
+	}
+}
 
 //-----------------gameover-----------------------------------------
 
@@ -1662,7 +1808,7 @@ int main(void){
 			
 			
 			setTransitionCard();
-			CheckTime();
+//			CheckTime();
 //----------------------------------PE2---------------------------------
 			fireballInit();
 			fireballShoot();
@@ -1842,6 +1988,7 @@ int main(void){
 //////////////////////////////////////
 //				Obstacle();
 			Obstacle(ObstacleP1(), ObstacleP2());
+			obstacleFire();
 //			GameOver1(ObstacleP1());
 //			GameOver2(ObstacleP2());
 			i++;

@@ -68,18 +68,16 @@ const uint8_t *soundPt = 0;
 //	soundPt = pt;
 //	TIMER2_CTL_R = 0x00000000;
 //	//TIMER2_TAILR_R = period-1;
-//	TIMER0_CTL_R = 0x00000001;
+//	TIMER2_CTL_R = 0x00000001;
 //};
 
 
 
 //	
 //void Timer2A_Handler(void){
-//	if(Index<counter){
-//		int32_t data = soundPt[Index];	
-//		Index = (Index +1);
-//	}
+
 //	DAC_Out(soundPt[Index]);
+// Index = (Index+1)%counter;
 //}
 
 //void Sound_FireballShoot(void){
