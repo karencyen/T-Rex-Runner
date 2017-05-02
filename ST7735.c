@@ -826,6 +826,22 @@ void ST7735_DrawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
 }
 
 
+//------------------squiggle-------------------
+void ST7735_DrawWave(int16_t x, int16_t y, int16_t h, uint16_t color) {
+  uint8_t hi = color >> 8, lo = color;
+
+  // Rudimentary clipping
+  if((x >= _width) || (y >= _height)) return;
+  if((y+h-1) >= _height) h = _height-y;
+  setAddrWindow(x, y, x, y+h-1);
+
+  while (h--) {
+    writedata(hi);
+    writedata(lo);
+  }
+}
+
+
 //------------ST7735_DrawFastHLine------------
 // Draw a horizontal line at the given coordinates with the given width and color.
 // A horizontal line is parallel to the shorter side of the rectangular display
