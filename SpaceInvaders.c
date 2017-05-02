@@ -77,7 +77,7 @@ int jumpFlag;
 	
 int flo = 0;
 //////////////////////////
-uint32_t currentStage = 0;
+uint32_t currentStage = 1;
 
 uint32_t DinoDimensionX = 26;
 uint32_t DinoDimensionY = 30;
@@ -122,7 +122,7 @@ typedef struct Obstacle STyp;
 
 STyp Stage[4] = {
 	{26, 15, 0, 180, 14, 20, 50, 180}, //earth cactus pter
-	{22, 22, 0, 180, 14, 20, 50, 180}, //air cloud pter
+	{22, 22, 0, 60, 14, 20, 0, 120}, //air cloud pter
 	{23, 14, 0, 180, 19, 24, 50, 180}, //water seaweed fish
 	{26, 15, 0, 180, 14, 20, 50, 180}, //fire
 	
@@ -870,11 +870,44 @@ void fireballExplode1(void){
 //////////////////////////////////
 		
 }	
+
+void fireballExplode2(void){
+
+	if(numberOfFireballs >0){
+		if (checkHitbox2(FireballDimensionX, FireballCoordinateX, FireballDimensionY, FireballCoordinateY) == 1){
+		fireballHit = 15;
+			reloadFireball = 1;
+			numberOfFireballs = 0;
+			obstacleHit = 1;
+			tempX = Stage[currentStage].Obstacle2CoordX;
+			tempY = Stage[currentStage].Obstacle2CoordY;
+			ST7735_FillRect(FireballCoordinateX, FireballCoordinateY-15, FireballDimensionX+2, FireballDimensionY+2, 0xFFFF);
+			ST7735_FillRect(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY-15, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY, 0xFFFF);
+		}
+		
+	}
+//////////////////////////	
+			if(fireballHit>0){
+			ST7735_DrawBitmap(tempX, tempY, Ash, 24, 26);
+			slowAsh ^=0x01;
+			if(slowAsh == 0x01)
+			{
+				tempY--;
+			}
+			fireballHit--;
+				if(fireballHit == 0){
+					ST7735_FillRect(tempX, tempY-20, 24+1, 26+1, 0xFFFF);
+				}
+			}
+//////////////////////////////////
+		
+}	
+
 //--------------------------Jumping--------------------------------------
 
 int Jump(void){
 
-	if ((((GPIO_PORTE_DATA_R &0x01) == 0x01)&& (jumpingTime==0)) ){  //&& ((currentStage == groundFlag) ||(currentStage == fireFlag))
+	if ((((GPIO_PORTE_DATA_R &0x01) == 0x01)&& (jumpingTime==0)) && ((currentStage == groundFlag) ||(currentStage == fireFlag))){  //&& ((currentStage == groundFlag) ||(currentStage == fireFlag))
 		jumpingTime = 50;
 		return 1;
 		}
@@ -885,13 +918,13 @@ int Jump(void){
 }
 
 int jumpingChecker(void){
-	if(((GPIO_PORTE_DATA_R &0x01) == 0x01) || (jumpingTime >0)){
+	if((((GPIO_PORTE_DATA_R &0x01) == 0x01) || (jumpingTime >0))&& ((currentStage == groundFlag) ||(currentStage == fireFlag))){
 		jumpFlag = 1;
 		return 1;
 	}
-//	else if (currentStage == waterFlag){
-//		return 2;
-//	}
+	else if ((currentStage == waterFlag)&&((GPIO_PORTE_DATA_R &0x01) == 0x01)){
+		return 2;
+	}
 	else{
 		jumpFlag = 0;
 		return 0;
@@ -913,11 +946,14 @@ void JumpAndErase(void){
 void jumpFunction(unsigned short *pt){
  if(((Jump() == 1) || jumpingTime >0)){
 				JumpAndErase();
-				jumpHeight = 5 -0.1*(y*(y-50));
-//				if(y>25){
-//					ST7735_FillRect(jumpHeight, DinoCoordinateY-17, DinoDimensionX-10, DinoDimensionY-12, 0xFFFF);
-//				}
+				jumpHeight = 0 -0.1*(y*(y-50));
 				ST7735_DrawBitmap(jumpHeight, 25, Run1, 26, 30);
+				if(y>25){
+					ST7735_FillRect(jumpHeight+10, DinoCoordinateY-25, DinoDimensionX-15, DinoDimensionY, 0xFFFF);
+				}
+				if(y<=25){
+					ST7735_FillRect(jumpHeight+10, DinoCoordinateY-25, DinoDimensionX-15, DinoDimensionY, 0xFFFF);
+				}
 				slowJump ^=0x01;
 //			if((slowJump == 0x01)&& jumpingTime>0)
 				if((positionFlag%5 == 0)&& jumpingTime>0)
@@ -926,14 +962,23 @@ void jumpFunction(unsigned short *pt){
 				jumpingTime--;
 			}
 				if(jumpingTime == 0){
+					ST7735_DrawBitmap(0, 25, Run1, 26, 30);
 					y = 0;
 					ST7735_FillRect(jumpHeight-2, 25-3, DinoDimensionX, DinoDimensionY, 0xFFFF);
 				}
-			}
- 	DinoCoordinateX = jumpHeight;
+	
+	DinoCoordinateX = jumpHeight;
+	if(jumpingTime == 0){
+		DinoCoordinateX = 0;
+	}
 	DinoCoordinateY = 25;
 	DinoDimensionX = 26;
 	DinoDimensionY = 30;
+			}
+// 	DinoCoordinateX = jumpHeight;
+//	DinoCoordinateY = 25;
+//	DinoDimensionX = 26;
+//	DinoDimensionY = 30;
 			
 }
 
@@ -952,13 +997,13 @@ unsigned short * RunPt(void){
 //-----------------------------Ducking------------------------------------
 int Duck(void){
 	int timer;
-	if (((GPIO_PORTE_DATA_R &0x02) == 0x02) ){ //&& ((currentStage == groundFlag) ||(currentStage == fireFlag))
+	if (((GPIO_PORTE_DATA_R &0x02) == 0x02) && ((currentStage == groundFlag) ||(currentStage == fireFlag))){ //&& ((currentStage == groundFlag) ||(currentStage == fireFlag))
 		duckFlag = 1;
 		return 1;
 	}
-//	else if(currentStage == waterFlag){
-//		return 2;
-//	}
+	else if(((GPIO_PORTE_DATA_R &0x02) == 0x02) && (currentStage == waterFlag)){
+		return 2;
+	}
 	else{
 		duckFlag = 0;
 		return 0;
@@ -1011,6 +1056,28 @@ unsigned short * DuckPt(void){
 	return duckPt;
 }
 
+
+
+//---------------------------potentiometer--------------------------------
+void slideLeftRight(void){
+	if(currentStage == airFlag){
+		Data = ADC_In();
+		Data = Data/26;
+		if(positionFlag%3 == 0){
+			DinoCoordinateY = Data;
+		}
+		if(currentStage == airFlag){
+				DinoCoordinateX +=0;
+				DinoCoordinateY +=0;
+			}
+				if(positionFlag >100){
+					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run1, 26, 30);
+				}
+				else{
+					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run2, 26, 30);
+				}
+	}
+}
 //-----------------------------Obstacle-----------------------------------
 	uint16_t yC = 180;
 	uint16_t yP = 180;
@@ -1052,9 +1119,11 @@ int ObstaclePick = 0;
 
 
 //--------------------------------------------
-
+int yCair = 0;
+int yPair = 0;
 
 void Obstacle(unsigned short *pt1, unsigned short *pt2){
+	if((currentStage == groundFlag) || (currentStage == waterFlag)){
 	if (ObstaclePick == 0){
 		Stage[currentStage].Obstacle1CoordX = 0;
 		Stage[currentStage].Obstacle1CoordY = yC;
@@ -1090,6 +1159,46 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 			Stage[currentStage].Obstacle2CoordX = 50;
 			Stage[currentStage].Obstacle2CoordY = yP;
 		}
+	}
+	}
+	
+		if(currentStage == airFlag){
+	if (ObstaclePick == 0){
+		Stage[currentStage].Obstacle1CoordX = yCair;
+		Stage[currentStage].Obstacle1CoordY = 60;
+		ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
+		slowCactus ^=0x01;
+	//	if(slowCactus == 0x01)
+		if(positionFlag%4== 0)
+		{
+			yCair++;
+		}
+		if(yCair ==140){
+				yCair = 0;
+			ObstaclePick = Random();
+			ObstaclePick &= 0x01;
+			Stage[currentStage].Obstacle1CoordX = yCair;
+			Stage[currentStage].Obstacle1CoordY = 60;
+		}
+	}
+	else if (ObstaclePick == 1){
+		Stage[currentStage].Obstacle2CoordX = yPair;
+		Stage[currentStage].Obstacle2CoordY = 120;
+		ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, pt2, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
+		slowPter ^=0x01;
+//		if(slowPter == 0x01)
+			if(positionFlag%4 == 0)
+		{
+			yPair++;
+		}
+		if(yPair ==140){
+				yPair = 0;
+			ObstaclePick = Random();
+			ObstaclePick &= 0x01;
+			Stage[currentStage].Obstacle2CoordX = yPair;
+			Stage[currentStage].Obstacle2CoordY = 120;
+		}
+	}
 	}
 }
 
@@ -1141,16 +1250,45 @@ unsigned short * ObstacleP2(void){
 }
 
 
+
+
+//-----------------gameover-----------------------------------------
+
+		void GameOver1( unsigned short *pt1){
+			if (checkHitbox1(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
+				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY); 
+				ST7735_OutString("GAME OVER");
+				k = 1;
+			}
+		}
+		
+		void GameOver2(unsigned short *pt2){
+			if (checkHitbox2(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
+				ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, pt2, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY); 
+				ST7735_OutString("GAME OVER");
+				k = 1;
+			}
+		}
 //---------------------------Time--------------------------------------
 uint32_t tellTime;
 void Score(void){
+
 	ST7735_SetRotation(1);
+
 	ST7735_FillRect(45, 10, 128, 8, 0xFFFF);
+
 	ST7735_SetCursor(1, 1);
+
 	ST7735_OutString("SCORE: ");
+
 	ST7735_OutUDec(tellTime);
+
 	tellTime++;	
+
 	ST7735_SetRotation(0);
+	
 }
 
 uint16_t timePer = 0;
@@ -1198,9 +1336,11 @@ void Controls(void){
 	}
 }
 //	
+
+
 //void floatUp(void){
 //	if(currentStage == waterFlag){
-//		
+	
 //	}
 //}
 
@@ -1239,10 +1379,13 @@ int main(void){
 //	int slowJump = 0x00;
 ////	int slowCactus=0x00;
 //	int jumpHeight;
+
+				DinoCoordinateX = 0;
+				DinoCoordinateY = Data;
 //------------------------------------------------------------------------
 	while(1 && k ==0
 		){
-		CheckTime();
+		//CheckTime();
 		//Controls();
 //		Controls();
 //		Data = ADC_In();
@@ -1252,6 +1395,12 @@ int main(void){
 			fireballInit();
 			fireballShoot();
 			fireballExplode1();
+			fireballExplode2();
+			
+			
+//-----------------potentiometer--------------------------------
+			
+			slideLeftRight();
 //----------------------PE1---------------------------------------	
 
 			DuckAndErase();
@@ -1267,52 +1416,74 @@ int main(void){
 				DinoCoordinateX = 0;
 				DinoCoordinateY = Data;
 			}
-//			else if(Duck() == 2){
-//				if(positionFlag <100){
-//					ST7735_DrawBitmap(DinoCoordinateX-1, DinoCoordinateY , Run1, 26, 30);
-//				}
-//				else{
-//					ST7735_DrawBitmap(DinoCoordinateX-1, DinoCoordinateY , Run2, 26, 30);
-//				}
-//				DinoCoordinateX = DinoCoordinateX-1;
-//				//flo++;
-//			}
+			else if(Duck() == 2){
+				if(positionFlag%3 == 0){
+					if(DinoCoordinateX > 0){ //btootm ofscreen/////////////////
+						DinoCoordinateX = DinoCoordinateX-1;
+					}
+				}
+				if(positionFlag <100){
+					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY , Run1, 26, 30);
+				}
+				else{
+					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY , Run2, 26, 30);
+				}
+				DinoDimensionX = 26;
+				DinoDimensionY = 30;
+				//flo++;
+			}
 			
 
 //----------------------PE0-----------------------------------------			
 			jumpFunction(RunPt());
 			
-//-----------------------------------------------------------------
+//------------------------run-------------------------------------
 
-			 if ((jumpingChecker() == 0)&& (duckFlag ==0))
-				{
+			 if (((GPIO_PORTE_DATA_R &= 0x01) == 0)&& (duckFlag ==0)){
+//					if((currentStage == groundFlag) || (currentStage == fireFlag)){
+//						DinoCoordinateX = 0;
+//						DinoCoordinateY = Data;
+//					}
+					if(currentStage == waterFlag){
+						DinoCoordinateX +=0;
+						DinoCoordinateY +=0;
+					}
 					if(positionFlag >100){
-						ST7735_DrawBitmap(0, Data, Run1, 26, 30);
+						ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run1, 26, 30);
 					}
 					else{
-						ST7735_DrawBitmap(0, Data, Run2, 26, 30);
+						ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run2, 26, 30);
 					}
 				DinoDimensionX = 26;
 				DinoDimensionY = 30;
-				DinoCoordinateX = 0;
-				DinoCoordinateY = Data;
+//				DinoCoordinateX = 0;
+//				DinoCoordinateY = Data;
 			}
-//			else if(jumpingChecker() == 2){
-//				if(positionFlag <100){
-//					ST7735_DrawBitmap(DinoCoordinateX+1, DinoCoordinateY , Run1, 26, 30);
-//				}
-//				else{
-//					ST7735_DrawBitmap(DinoCoordinateX+1, DinoCoordinateY , Run2, 26, 30);
-//				}
-//				DinoCoordinateX = DinoCoordinateX=1;
-//				//flo++;
-//			}
-			//}
+			 
+			//------------water---------------------------------------------
+			else if(jumpingChecker() == 2){
+				
+				if( positionFlag%3 == 0){
+					
+					if(DinoCoordinateX<140){ /////top of screen
+						DinoCoordinateX = DinoCoordinateX+1;
+					}
+				}
+				if(positionFlag <100){
+					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY , Run1, 26, 30);
+				}
+				else{
+					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY , Run2, 26, 30);
+				}
+				//flo++;
+			}
+
 
 			if(obstacleHit == 1){
 				yC = 0;  
 				obstacleHit = 0;
 				numberOfFireballs = 0;
+				yP = 0;
 			}
 			
 //////////////////////////////////
@@ -1330,12 +1501,8 @@ int main(void){
 //////////////////////////////////////
 //				Obstacle();
 			Obstacle(ObstacleP1(), ObstacleP2());
-//			if (checkHitbox1(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
-//				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
-//				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Cactus, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY); 
-//				ST7735_OutString("GAME OVER");
-//				k = 1;
-//			}
+//			GameOver1(ObstacleP1());
+//			GameOver2(ObstacleP2());
 			i++;
 			j++;
 			positionFlag--;
