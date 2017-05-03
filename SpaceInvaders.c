@@ -78,7 +78,7 @@ int jumpFlag;
 	
 int flo = 0;
 //////////////////////////
-uint32_t currentStage = 1;
+uint32_t currentStage = 0;
 
 uint32_t DinoDimensionX = 26;
 uint32_t DinoDimensionY = 30;
@@ -921,18 +921,18 @@ void fireballShoot(void){
 		if(currentStage == airFlag){
 			if(g < 95){ // fireballCoordinateY[i]
 			//ST7735_SetRotation(1);
-				if(g<2){
-					ST7735_FillRect(DinoCoordinateX, DinoCoordinateY-17, DinoDimensionX, DinoDimensionY-10, 0xFFFF);
-				}
-				if(g<10){
-					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Duck1, 26, 30);
-				}
+//				if(g<2){
+//					ST7735_FillRect(DinoCoordinateX, DinoCoordinateY-17, DinoDimensionX, DinoDimensionY-10, 0xFFFF);
+//				}
+//				if(g<10){
+//					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Duck1, 26, 30);
+//				}
 				ST7735_DrawBitmap(FireballCoordinateX, DinoCoordinateY, Fireball, FireballDimensionX, FireballDimensionY); 
 			//ST7735_SetRotation(0);
 				FireballCoordinateX= 85 -g;
 				g++;
 //			FireballCoordinateX = Stage[currentStage].Obstacle1CoordX;
-				FireballCoordinateY = FireballCoordinateY;
+				FireballCoordinateY = DinoCoordinateY;
 			}
 			else{
 				numberOfFireballs = 0;
@@ -1053,7 +1053,7 @@ void JumpAndErase(void){
 	
 void jumpFunction(unsigned short *pt){
  if(((Jump() == 1) || jumpingTime >0)){
-				//Sound_Jumpp();
+				Sound_Jumpp();
 				JumpAndErase();
 				jumpHeight = 0 -0.1*(y*(y-50));
 				ST7735_DrawBitmap(jumpHeight, 25, Run1, 26, 30);
@@ -1161,6 +1161,7 @@ unsigned short * DuckPt(void){
 
 
 //---------------------------potentiometer--------------------------------
+//int check
 void slideLeftRight(void){
 	if((currentStage == airFlag) && ~(g>0 && g<10)){
 		Data = ADC_In();
@@ -1177,6 +1178,7 @@ void slideLeftRight(void){
 		}
 		if(positionFlag >100){
 					//ST7735_SetRotation(2);
+				ST7735_FillRect(DinoCoordinateX, DinoCoordinateY-17, DinoDimensionX, DinoDimensionY-10, 0xFFFF);
 			ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run1, 26, 30);
 					//ST7735_SetRotation(0);
 		}

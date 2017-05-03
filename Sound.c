@@ -50,6 +50,7 @@ void Timer2_Init( uint32_t period){
   TIMER2_TAPR_R = 0;            // 5) bus clock resolution
   TIMER2_ICR_R = 0x00000001;    // 6) clear TIMER0A timeout flag
   TIMER2_IMR_R = 0x00000001;    // 7) arm timeout interrupt
+	//NVIC_PRI4_R = (NVIC_PRI4_R&0x00FFFFFF)|0x80000000; // 8) priority 4
   NVIC_PRI4_R = (NVIC_PRI4_R&0x00FFFFFF)|0x80000000; // 8) priority 4
 // interrupts enabled in the main program after all devices initialized
 // vector number 35, interrupt number 19
@@ -64,21 +65,36 @@ void Sound_Init(void){
 	Index = 0;
 };
 void Sound_Play(const uint8_t *pt, uint32_t count){
-	//Index = 0;
 	counter = count;
-	soundPt = pt;
-	TIMER2_CTL_R = 0x00000000;
-	TIMER2_TAILR_R = 80000000/11025-1;
-	TIMER2_CTL_R = 0x00000001;
+	Index = 0;
+	soundPt = pt;	
+	TIMER2_TAILR_R = (80000000/(11025*2));
+	TIMER2_CTL_R |= 0x00000001;
+	//
+
+	
+//	if(Index == counter){
+//		TIMER2_CTL_R &= ~0x00000001;
+//		Index = 0;
+//	}
 };
 
 
 
 	
 void Timer2A_Handler(void){
-
-	DAC_Out(soundPt[Index]);
- Index = (Index+1)%counter;
+//	if((GPIO_PORTE_DATA_R & 0x01) == 0x01){
+		TIMER2_ICR_R = 0x01;
+//	}
+	TIMER2_CTL_R &= ~0x00000001;
+	if(counter>Index){
+		DAC_Out(soundPt[Index]);
+		Index = (Index+1);  //%counter;
+	}
+	else{
+		TIMER2_CTL_R &= ~0x00000001;
+	}
+	TIMER2_CTL_R |= 0x00000001;
 }
 
 //void Sound_FireballShoot(void){
