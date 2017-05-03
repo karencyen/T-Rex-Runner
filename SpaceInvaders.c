@@ -61,10 +61,10 @@
 void DisableInterrupts(void); // Disable interrupts
 void EnableInterrupts(void);  // Enable interrupts
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
-
+int iconPick = 0;
 uint32_t Data;
 int positionFlag = 100;
-int modFlag = 200;
+int modFlag = 300;
 int jumpingTime = 0;
 int duckFlag = 0;
 int jumpFlag;
@@ -1217,7 +1217,7 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 			ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
 	//	slowCactus ^=0x01;
 	//	if(slowCactus == 0x01)
-			if(modFlag%8== 0)
+			if(modFlag%4== 0)
 			{
 				yC--;
 			}
@@ -1459,7 +1459,7 @@ void obstacleFire(void){
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, Fireball, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
 		slowPter ^=0x01;
 //		if(slowPter == 0x01)
-			if(modFlag%4 == 0)
+			if(modFlag%5 == 0)
 		{
 			yFire2--;
 			xFire2--;
@@ -1543,7 +1543,7 @@ void obstacleFire(void){
 			}
 		}
 		
-		
+int powerFlagg = 0;	
 		
 //-------------------------powerup------------------------------------------
 int q = 180;
@@ -1556,6 +1556,9 @@ void getFirePower(void){
 		Sound_powerup();
 		ST7735_FillRect(IconCoordX, IconCoordY-10, IconDimenX+2, IconDimenY+2, 0xFFFF);
 		q = 180;
+		powerFlagg = 0;
+		iconPick = Random();
+		iconPick &= 0x03;
 		f=0;
 		powerUpFlag = 1;
 		GPIO_PORTE_DEN_R |= 0x04;
@@ -1615,7 +1618,7 @@ uint8_t CheckTime(void){
 			currentStage++;
 			transitionFlag = 1;
 			n++;
-			if(currentStage == 4){  //3
+			if(currentStage == 3){  //3
 				currentStage = 0;
 			}
 	}
@@ -1703,7 +1706,7 @@ void setTransitionCard(void){
 	}
 }
 
-int iconPick = 0;
+
 // *************************** Capture image dimensions out of BMP**********
 
 int main(void){
@@ -1843,10 +1846,13 @@ int main(void){
 			}
 	//---------------------powerup---------------------
 			
-			
-			if(iconPick == 0x00){
+			if(tellTime%8 == 0){
+				powerFlagg = 1;
+			}
+			if(powerFlagg == 1){
 				if((currentStage == groundFlag) || (currentStage == waterFlag)){
 					IconCoordY = q;
+					IconCoordX = 70;
 					ST7735_DrawBitmap(IconCoordX, IconCoordY, IconF, IconDimenX, IconDimenY);
 					if(modFlag%6 == 0){
 						q--;
@@ -1854,6 +1860,9 @@ int main(void){
 					}
 					if(q == 0){
 						q = 180;
+						powerFlagg = 0;
+						iconPick = Random();
+						iconPick &= 0x06;
 					}
 				}
 			if(currentStage == airFlag){
@@ -1866,19 +1875,22 @@ int main(void){
 				}
 				if(f == 140){
 					f = 0;
+					powerFlagg = 0;
+					iconPick = Random();
+					iconPick &= 0x06;
 				}
 			}
 			}
 			if((currentStage == groundFlag) || (currentStage == waterFlag)){
 				if(q == 180){
 					iconPick = Random();
-					iconPick &= 0x01;
+					iconPick &= 0x06;
 				}
 			}
 			if(currentStage == airFlag){
 				if(f == 100){
 					iconPick = Random();
-					iconPick &= 0x01;
+					iconPick &= 0x06;
 				}
 			}
 			
@@ -1891,9 +1903,9 @@ int main(void){
 //				Obstacle();
 			Obstacle(ObstacleP1(), ObstacleP2());
 			obstacleFire();
-			GameOver1(ObstacleP1());
-			GameOver2(ObstacleP2());
-//			GameOver3();
+//			GameOver1(ObstacleP1());
+//			GameOver2(ObstacleP2());
+
 			
 			i++;
 			j++;
@@ -1905,8 +1917,8 @@ int main(void){
 			if(modFlag == 0){
 				modFlag = 400;
 			}
-			if(tellTime%80 == 1){ /////-----------------------------------------------------
-				modFlag +=100;
+			if(tellTime%60 == 1){ /////-----------------------------------------------------
+				modFlag +=200;
 			}
 			
 	}
