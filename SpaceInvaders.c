@@ -56,7 +56,7 @@
 #include "TExaS.h"
 #include "ADC.h"
 #include "Timer0.h"
-
+#include "Sound.h"
 
 void DisableInterrupts(void); // Disable interrupts
 void EnableInterrupts(void);  // Enable interrupts
@@ -64,6 +64,7 @@ void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 
 uint32_t Data;
 int positionFlag = 100;
+int modFlag = 200;
 int jumpingTime = 0;
 int duckFlag = 0;
 int jumpFlag;
@@ -77,7 +78,7 @@ int jumpFlag;
 	
 int flo = 0;
 //////////////////////////
-uint32_t currentStage = 3;
+uint32_t currentStage = 0;
 
 uint32_t DinoDimensionX = 26;
 uint32_t DinoDimensionY = 30;
@@ -128,7 +129,7 @@ STyp Stage[4] = {
 	{26, 15, 0, 180,    14, 20, 15, 180}, //earth cactus pter
 	{22, 22, 0, 60,    14, 20, 0, 120}, //air cloud pter
 	{23, 14, 0, 180,    19, 24, 50, 180}, //water seaweed fish
-	{26, 15, 0, 180,    10, 15, 100, 180,   10, 15, 140, 70}, //fire
+	{10, 15, 0, 180,    10, 15, 100, 180,   10, 15, 140, 70}, //fire
 	
 };
 // *************************** Debug ***************************
@@ -153,53 +154,53 @@ void PortF_Init(void){
 
 
 
-const unsigned short Start[] = {
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0x73AE, 0x630C, 0x632C, 0x5ACB, 0xBDD7, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x630C, 0x4A49, 0x4A69, 0x4A49, 0x6B6D, 0xD69A, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xCE59,
- 0xFFDF, 0x632C, 0x4A69, 0x528A, 0x528A, 0x4208, 0xB596, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x630C, 0xE71C, 0x6B4D, 0x4A69, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0x632C,
- 0xE71C, 0x6B4D, 0x4A69, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xAD55, 0x73AE, 0xD6BA, 0xFFFF, 0x6B4D, 0xEF5D, 0x6B4D, 0x4A69, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0xB5B6, 0x4A69, 0xC638, 0xFFFF, 0x6B6D,
- 0xAD75, 0x630C, 0x528A, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFDF, 0xE73C, 0xEF5D, 0xFFDF, 0x7BEF, 0xB5B6, 0xFFDF, 0x738E, 0x4228, 0x528A, 0x528A, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0x4A69, 0x4A69, 0x4A69, 0x528A, 0x4A69, 0x4A69, 0x528A,
- 0x528A, 0x528A, 0x528A, 0x528A, 0x4A69, 0x4228, 0xB5B6, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xC638,
- 0x6B6D, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4A69, 0xEF5D, 0x4208, 0xB5B6, 0xFFFF,
- 0xFFDF, 0xE73C, 0xAD75, 0xFFFF, 0xFFDF, 0xFFFF, 0xDEFB, 0x7BCF, 0x4A49, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A,
- 0x528A, 0x528A, 0x528A, 0x4A69, 0xB596, 0x4208, 0xB596, 0xFFFF, 0xFFDF, 0xD69A, 0x5ACB, 0xDEDB, 0xD69A, 0xDEDB, 0x9CF3, 0x4228,
- 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4228, 0x5AEB, 0xC638, 0xFFFF,
- 0xFFDF, 0xD6BA, 0x39E7, 0x4228, 0x4228, 0x4A49, 0x4A69, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4A69,
- 0x4A69, 0x4A69, 0x4A69, 0x4A69, 0x4208, 0xAD75, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xEF7D, 0xFFFF, 0xC618, 0x39E7, 0x528A, 0x528A,
- 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x39E7, 0xCE79, 0xFFFF, 0xF79E, 0xF79E, 0xF79E, 0xF79E, 0xFFFF, 0xFFDF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0xEF7D, 0x94B2, 0x4A49, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4A49, 0x9CD3, 0xF79E,
- 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFDF, 0xF79E, 0xA514, 0x4A49, 0x528A,
- 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x39E7, 0xD69A, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xC638, 0x4208, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4A49, 0x9CF3, 0xEF7D, 0xFFDF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xD69A, 0x6B6D, 0xE71C, 0x4228, 0x528A, 0x528A, 0x528A,
- 0x528A, 0x528A, 0x528A, 0x528A, 0x4208, 0xCE59, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFDF, 0xD6BA, 0x4A49, 0x738E, 0x4228, 0x4A69, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4228, 0x9CD3, 0xEF7D, 0xFFDF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xE73C, 0x8C51, 0x8C71, 0x94B2, 0x7BEF, 0x4A49, 0x528A,
- 0x528A, 0x528A, 0x4A69, 0x73AE, 0xDEFB, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xCE79, 0x528A, 0x528A, 0x528A, 0x528A, 0x4228, 0xC638, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0xB5B6, 0x4208,
- 0x528A, 0x528A, 0x4228, 0xC618, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x9CF3, 0x4228, 0x528A, 0x528A, 0x52AA, 0xCE79, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xDEDB,
- 0x73AE, 0x4A49, 0x528A, 0x4A49, 0x8410, 0xE73C, 0xFFFF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xBDF7, 0x5ACB, 0x4A69, 0x528A, 0x4208, 0xAD75, 0xDEDB, 0xF79E,
- 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0x9CF3, 0x4228, 0x4A69, 0x4A69, 0x4A49, 0x39E7, 0xD69A, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xF79E, 0xEF5D, 0xEF5D, 0xEF5D, 0xEF5D, 0xEF5D, 0xFFFF,
- 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF,
- 0xFFFF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-};
+//const unsigned short Start[] = {
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0x73AE, 0x630C, 0x632C, 0x5ACB, 0xBDD7, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x630C, 0x4A49, 0x4A69, 0x4A49, 0x6B6D, 0xD69A, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xCE59,
+// 0xFFDF, 0x632C, 0x4A69, 0x528A, 0x528A, 0x4208, 0xB596, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x630C, 0xE71C, 0x6B4D, 0x4A69, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0x632C,
+// 0xE71C, 0x6B4D, 0x4A69, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xAD55, 0x73AE, 0xD6BA, 0xFFFF, 0x6B4D, 0xEF5D, 0x6B4D, 0x4A69, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0xB5B6, 0x4A69, 0xC638, 0xFFFF, 0x6B6D,
+// 0xAD75, 0x630C, 0x528A, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFDF, 0xE73C, 0xEF5D, 0xFFDF, 0x7BEF, 0xB5B6, 0xFFDF, 0x738E, 0x4228, 0x528A, 0x528A, 0x528A, 0x528A, 0x4228, 0xB5B6, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0x4A69, 0x4A69, 0x4A69, 0x528A, 0x4A69, 0x4A69, 0x528A,
+// 0x528A, 0x528A, 0x528A, 0x528A, 0x4A69, 0x4228, 0xB5B6, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xC638,
+// 0x6B6D, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4A69, 0xEF5D, 0x4208, 0xB5B6, 0xFFFF,
+// 0xFFDF, 0xE73C, 0xAD75, 0xFFFF, 0xFFDF, 0xFFFF, 0xDEFB, 0x7BCF, 0x4A49, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A,
+// 0x528A, 0x528A, 0x528A, 0x4A69, 0xB596, 0x4208, 0xB596, 0xFFFF, 0xFFDF, 0xD69A, 0x5ACB, 0xDEDB, 0xD69A, 0xDEDB, 0x9CF3, 0x4228,
+// 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4228, 0x5AEB, 0xC638, 0xFFFF,
+// 0xFFDF, 0xD6BA, 0x39E7, 0x4228, 0x4228, 0x4A49, 0x4A69, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4A69,
+// 0x4A69, 0x4A69, 0x4A69, 0x4A69, 0x4208, 0xAD75, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xEF7D, 0xFFFF, 0xC618, 0x39E7, 0x528A, 0x528A,
+// 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x39E7, 0xCE79, 0xFFFF, 0xF79E, 0xF79E, 0xF79E, 0xF79E, 0xFFFF, 0xFFDF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0xEF7D, 0x94B2, 0x4A49, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4A49, 0x9CD3, 0xF79E,
+// 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFDF, 0xF79E, 0xA514, 0x4A49, 0x528A,
+// 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x39E7, 0xD69A, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xC638, 0x4208, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4A49, 0x9CF3, 0xEF7D, 0xFFDF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xD69A, 0x6B6D, 0xE71C, 0x4228, 0x528A, 0x528A, 0x528A,
+// 0x528A, 0x528A, 0x528A, 0x528A, 0x4208, 0xCE59, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFDF, 0xD6BA, 0x4A49, 0x738E, 0x4228, 0x4A69, 0x528A, 0x528A, 0x528A, 0x528A, 0x528A, 0x4228, 0x9CD3, 0xEF7D, 0xFFDF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xE73C, 0x8C51, 0x8C71, 0x94B2, 0x7BEF, 0x4A49, 0x528A,
+// 0x528A, 0x528A, 0x4A69, 0x73AE, 0xDEFB, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xCE79, 0x528A, 0x528A, 0x528A, 0x528A, 0x4228, 0xC638, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFFF, 0xB5B6, 0x4208,
+// 0x528A, 0x528A, 0x4228, 0xC618, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x9CF3, 0x4228, 0x528A, 0x528A, 0x52AA, 0xCE79, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xDEDB,
+// 0x73AE, 0x4A49, 0x528A, 0x4A49, 0x8410, 0xE73C, 0xFFFF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xBDF7, 0x5ACB, 0x4A69, 0x528A, 0x4208, 0xAD75, 0xDEDB, 0xF79E,
+// 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0x9CF3, 0x4228, 0x4A69, 0x4A69, 0x4A49, 0x39E7, 0xD69A, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xF79E, 0xEF5D, 0xEF5D, 0xEF5D, 0xEF5D, 0xEF5D, 0xFFFF,
+// 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF,
+// 0xFFFF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFDF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+//};
 
 unsigned short Run1[] = {
  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -883,9 +884,6 @@ void fireballInit(void){
 		if(duckFlag == 1){
 			height = 2;
 		}
-//		else if(jumpFlag == 1){
-//			height = 5 -0.1*(y*(y-50));
-//		}
 		else{
 			height = 13;
 		}
@@ -907,13 +905,11 @@ int reloadFireball = 0;
 void fireballShoot(void){
 	int i = 0;
 	int j = 0;
-//	int wait = 0;
 	while(i < numberOfFireballs){  //whileloop goes through all the fireballs, moving them by one pixel
 		if((currentStage == groundFlag) || (currentStage == waterFlag)){
 		if(FireballCoordinateY < 200){ // fireballCoordinateY[i]
 			ST7735_DrawBitmap(FireballCoordinateX, FireballCoordinateY+1, Fireball, FireballDimensionX, FireballDimensionY); 
 			FireballCoordinateY= FireballCoordinateY +1;
-//			FireballCoordinateX = Stage[currentStage].Obstacle1CoordX;
 			FireballCoordinateX = FireballCoordinateX;
 		}
 		else{
@@ -923,39 +919,23 @@ void fireballShoot(void){
 	wait++;
 	}
 		if(currentStage == airFlag){
-			
-//			if(FireballCoordinateY < 200){ // fireballCoordinateY[i]
-//				ST7735_SetRotation(1);
-//			ST7735_DrawBitmap(FireballCoordinateX, FireballCoordinateY+1, Fireball, FireballDimensionX, FireballDimensionY); 
-//				ST7735_SetRotation(0);
-//			FireballCoordinateY= FireballCoordinateY +1;
-////			FireballCoordinateX = Stage[currentStage].Obstacle1CoordX;
-//			FireballCoordinateX = FireballCoordinateX;
-//		}
-//		else{
-//			numberOfFireballs = 0;
-//		}
-//		i++;
-//	wait++;
-			
-		if(g < 95){ // fireballCoordinateY[i]
+			if(g < 95){ // fireballCoordinateY[i]
 			//ST7735_SetRotation(1);
-			ST7735_DrawBitmap(FireballCoordinateX, FireballCoordinateY, Fireball, FireballDimensionX, FireballDimensionY); 
+				ST7735_DrawBitmap(FireballCoordinateX, FireballCoordinateY, Fireball, FireballDimensionX, FireballDimensionY); 
 			//ST7735_SetRotation(0);
-			FireballCoordinateX= 85 -g;
-			g++;
+				FireballCoordinateX= 85 -g;
+				g++;
 //			FireballCoordinateX = Stage[currentStage].Obstacle1CoordX;
-			FireballCoordinateY = FireballCoordinateY;
-		}
-		else{
-			numberOfFireballs = 0;
-			g = 0;
-			
-		}
+				FireballCoordinateY = FireballCoordinateY;
+			}
+			else{
+				numberOfFireballs = 0;
+				g = 0;
+			}
 		i++;
 	wait++;
 	}
-	}
+}
 
 }
 
@@ -1025,22 +1005,19 @@ void fireballExplode2(void){
 					ST7735_FillRect(tempX, tempY-20, 24+1, 26+1, 0xFFFF);
 				}
 			}
-//////////////////////////////////
-		
+//////////////////////////////////	
 }	
 
 //--------------------------Jumping--------------------------------------
 
 int Jump(void){
-
 	if ((((GPIO_PORTE_DATA_R &0x01) == 0x01)&& (jumpingTime==0)) && ((currentStage == groundFlag) ||(currentStage == fireFlag))){  //&& ((currentStage == groundFlag) ||(currentStage == fireFlag))
 		jumpingTime = 50;
 		return 1;
-		}
-		else{
-			return 0;
-		}
-	
+	}
+	else{
+		return 0;
+	}
 }
 
 int jumpingChecker(void){
@@ -1066,11 +1043,11 @@ void JumpAndErase(void){
 	if((GPIO_PORTE_DATA_R &0x01) == 0x00){
 		eraseJ = 1;
 	}
-	
 }
 	
 void jumpFunction(unsigned short *pt){
  if(((Jump() == 1) || jumpingTime >0)){
+				Sound_Jumpp();
 				JumpAndErase();
 				jumpHeight = 0 -0.1*(y*(y-50));
 				ST7735_DrawBitmap(jumpHeight, 25, Run1, 26, 30);
@@ -1081,7 +1058,6 @@ void jumpFunction(unsigned short *pt){
 					ST7735_FillRect(jumpHeight+0, DinoCoordinateY-25, DinoDimensionX-20, DinoDimensionY, 0xFFFF);
 				}
 				slowJump ^=0x01;
-//			if((slowJump == 0x01)&& jumpingTime>0)
 				if((positionFlag%5 == 0)&& jumpingTime>0)
 			{
 				y++;;
@@ -1101,10 +1077,6 @@ void jumpFunction(unsigned short *pt){
 	DinoDimensionX = 26;
 	DinoDimensionY = 30;
 			}
-// 	DinoCoordinateX = jumpHeight;
-//	DinoCoordinateY = 25;
-//	DinoDimensionX = 26;
-//	DinoDimensionY = 30;
 			
 }
 
@@ -1135,6 +1107,7 @@ int Duck(void){
 		return 0;
 	}
 }
+
 int erase = 1;
 void DuckAndErase(void){
 	if (((GPIO_PORTE_DATA_R &0x02) == 0x02) && (erase == 1)){
@@ -1144,32 +1117,29 @@ void DuckAndErase(void){
 	if((GPIO_PORTE_DATA_R &0x02) == 0x00){
 		erase = 1;
 	}
-	
 }
 
 void duckFunction(void){
-		//	DuckAndErase();
-			if((Duck()==1)) {
-				if(positionFlag >50){
-						ST7735_DrawBitmap(0, Data, Duck1, 26, 30);
-					}
-					else{
-						ST7735_DrawBitmap(0, Data, Duck2, 26, 30);
-					}
-			}
+	if((Duck()==1)) {
+		if(positionFlag >50){
+			ST7735_DrawBitmap(0, Data, Duck1, 26, 30);
+		}
+		else{
+			ST7735_DrawBitmap(0, Data, Duck2, 26, 30);
+		}
 	}
+}
 
 void duckFunction1(void){
-	//DuckAndErase();
-			if((GPIO_PORTE_DATA_R &0x02) == 0x02) {
-				if(positionFlag >50){
-						ST7735_DrawBitmap(0, Data, Duck1, 26, 30);
-					}
-					else{
-						ST7735_DrawBitmap(0, Data, Duck2, 26, 30);
-					}
-			}
+	if((GPIO_PORTE_DATA_R &0x02) == 0x02) {
+		if(positionFlag >50){
+			ST7735_DrawBitmap(0, Data, Duck1, 26, 30);
 		}
+	else{
+		ST7735_DrawBitmap(0, Data, Duck2, 26, 30);
+	}
+	}
+}
 			
 unsigned short * DuckPt(void){
 	unsigned short *duckPt;
@@ -1189,28 +1159,26 @@ void slideLeftRight(void){
 	if(currentStage == airFlag){
 		Data = ADC_In();
 		Data = Data/26;
-//		if(positionFlag%3 == 0){
 		if(DinoCoordinateY>25){
 			DinoCoordinateY = Data;
 		}
 		if(DinoCoordinateY <= 25){
 			DinoCoordinateY = 26;
 		}
-//		}
 		if(currentStage == airFlag){
 				DinoCoordinateX =85;
 				DinoCoordinateY +=0;
-			}
-				if(positionFlag >100){
+		}
+		if(positionFlag >100){
 					//ST7735_SetRotation(2);
-					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run1, 26, 30);
+			ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run1, 26, 30);
 					//ST7735_SetRotation(0);
-				}
-				else{
+		}
+		else{
 					//ST7735_SetRotation(2);
-					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run2, 26, 30);
+			ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run2, 26, 30);
 					//ST7735_SetRotation(0);
-				}
+		}
 	}
 }
 //-----------------------------Obstacle-----------------------------------
@@ -1219,39 +1187,6 @@ void slideLeftRight(void){
 	int slowCactus=0x00;
 	int slowPter = 0x00;
 int ObstaclePick = 0;
-//void Obstacle(void){
-//	if (ObstaclePick == 0){
-//		ST7735_DrawBitmap(0, yC, Cactus, 26, 15);
-//		Stage[currentStage].Obstacle1CoordX = 0;
-//		Stage[currentStage].Obstacle1CoordY = yC;
-//		slowCactus ^=0x01;
-//		if(slowCactus == 0x01)
-//		{
-//			yC--;
-//		}
-//		if(yC ==0){
-//				yC = 180;
-//			ObstaclePick = Random();
-//			ObstaclePick &= 0x01;
-//		}
-//	}
-//	else if (ObstaclePick == 1){
-//		ST7735_DrawBitmap(50, yP, Pterodactyl, 14, 20);
-//		Stage[currentStage].Obstacle2CoordX = 0;
-//		Stage[currentStage].Obstacle2CoordY = yP;
-//		slowPter ^=0x01;
-//		if(slowPter == 0x01)
-//		{
-//			yP--;
-//		}
-//		if(yP ==0){
-//				yP = 180;
-//			ObstaclePick = Random();
-//			ObstaclePick &= 0x01;
-//		}
-//	}
-//}
-
 
 //--------------------------------------------
 int yCair = 0;
@@ -1265,38 +1200,29 @@ int airHeight = 0;
 
 void Obstacle(unsigned short *pt1, unsigned short *pt2){
 	if((currentStage == groundFlag) || (currentStage == waterFlag)){
-//	if(yC == 180){
-//		ObstaclePick = Random();
-//		ObstaclePick &= 0x01;
-//	}
-	if ((ObstaclePick == 0)||(currentStage == waterFlag)){
-		Stage[currentStage].Obstacle1CoordX = 0;
-		Stage[currentStage].Obstacle1CoordY = yC;
-		ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
-		slowCactus ^=0x01;
+		if ((ObstaclePick == 0)||(currentStage == waterFlag)){
+			Stage[currentStage].Obstacle1CoordX = 0;
+			Stage[currentStage].Obstacle1CoordY = yC;
+			ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
+	//	slowCactus ^=0x01;
 	//	if(slowCactus == 0x01)
-		if(positionFlag%4== 0)
-		{
-			yC--;
-		}
-		if(yC ==0){
+			if(modFlag%8== 0)
+			{
+				yC--;
+			}
+			if(yC ==0){
 				yC = 180;
 			ObstaclePick = Random();
 			ObstaclePick &= 0x01;
 			Stage[currentStage].Obstacle1CoordX = 0;
 			Stage[currentStage].Obstacle1CoordY = yC;
+			}
 		}
-	}
 	if ((ObstaclePick == 1) && ((currentStage == groundFlag) || (currentStage == waterFlag))){
 		Stage[currentStage].Obstacle2CoordX = 15;
 	}
 	Stage[currentStage].Obstacle2CoordY = yP;
 
-//	if(currentStage == waterFlag){
-//		Stage[currentStage].Obstacle2CoordY = yP+10;
-//	}
-//			Stage[currentStage].Obstacle2CoordX = 15;
-//		}
 		if((currentStage == waterFlag) && (waterPick == 0)){
 			Stage[currentStage].Obstacle2CoordX = 20;
 		}
@@ -1310,10 +1236,10 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 			Stage[currentStage].Obstacle2CoordX = 80;
 		}
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, pt2, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
-		slowPter ^=0x01;
+		//slowPter ^=0x01;
 //		if(slowPter == 0x01)
 		if (((ObstaclePick == 1) && ((currentStage == groundFlag) || (currentStage == waterFlag)))||(currentStage == waterFlag)){
-			if(positionFlag%3 == 0)
+			if(modFlag%6 == 0)
 		{
 			yP--;
 		}
@@ -1329,12 +1255,10 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 			waterPick &= 0x03;
 		}
 	}
-//	}
 	}
 	//=========
 	
 		if(currentStage == airFlag){
-	//if (ObstaclePick == 0){
 		Stage[currentStage].Obstacle1CoordX = yCair;
 		Stage[currentStage].Obstacle1CoordY = 60;
 		if((currentStage == airFlag) && (airPick1 == 0)){
@@ -1350,23 +1274,21 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 			Stage[currentStage].Obstacle1CoordY = 160;
 		}
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
-		slowCactus ^=0x01;
+	//	slowCactus ^=0x01;
 	//	if(slowCactus == 0x01)
-		if(positionFlag%3== 0)
+		if(modFlag%6== 0)
 		{
 			yCair++;
 		}
 		if(yCair ==140){
 				yCair = 0;
-//			ObstaclePick = Random();
-//			ObstaclePick &= 0x01;
+
 			Stage[currentStage].Obstacle1CoordX = yCair;
 			Stage[currentStage].Obstacle1CoordY = 60;
 			airPick1 = Random();
 			airPick1 &= 0x03;
 		}
-	//}
-	//else if (ObstaclePick == 1){
+
 		Stage[currentStage].Obstacle2CoordX = yPair;
 		Stage[currentStage].Obstacle2CoordY = 120;
 		if((currentStage == airFlag) && (airPick2 == 3)){
@@ -1382,27 +1304,21 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 			Stage[currentStage].Obstacle2CoordY = 135;
 		}
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, pt2, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
-		slowPter ^=0x01;
+	//	slowPter ^=0x01;
 //		if(slowPter == 0x01)
-			if(positionFlag%2 == 0)
+			if(modFlag%4 == 0)
 		{
 			yPair++;
 		}
 		if(yPair ==140){
 				yPair = 0;
-//			ObstaclePick = Random();
-//			ObstaclePick &= 0x01;
 			Stage[currentStage].Obstacle2CoordX = yPair;
 			Stage[currentStage].Obstacle2CoordY = 120;
 			airPick2 = Random();
 			airPick2 &= 0x03;
 		}
-	//}
-	}
-		
-	
+	}	
 }
-
 
 
 unsigned short * ObstacleP1(void){
@@ -1419,12 +1335,6 @@ unsigned short * ObstacleP1(void){
 	if(currentStage == airFlag){
 		obstaclePt = ThunderCloud;
 	}
-	
-	
-//	else{ //(currentStage == waterFlag){
-//		obstaclePt = Seaweed;
-//	}
-
 	return obstaclePt;
 }
 
@@ -1490,10 +1400,12 @@ void obstacleFire(void){
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Fireball, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
 		slowCactus ^=0x01;
 	//	if(slowCactus == 0x01)
-		if(positionFlag%3== 0)
+		if(modFlag%6== 0)
 		{
 			xFire1--;
 			yFire1--;
+			Stage[currentStage].Obstacle1CoordX = xFire1;
+			Stage[currentStage].Obstacle1CoordY = yFire1;
 		}
 		if((xFire1 == 0) || (yFire1 == 0)){
 				yFire1 = 0;
@@ -1502,8 +1414,8 @@ void obstacleFire(void){
 //			ObstaclePick &= 0x01;
 			temp1Xf =Stage[currentStage].Obstacle1CoordX;
 			temp1Yf =Stage[currentStage].Obstacle1CoordY;
-			Stage[currentStage].Obstacle1CoordX = yFire1;
-			Stage[currentStage].Obstacle1CoordY = 60;
+//			Stage[currentStage].Obstacle1CoordX = yFire1;
+//			Stage[currentStage].Obstacle1CoordY = 60;
 			firePick1 = Random();
 			firePick1 &= 0x03;
 			tempExplode1 = 15;
@@ -1536,20 +1448,20 @@ void obstacleFire(void){
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, Fireball, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
 		slowPter ^=0x01;
 //		if(slowPter == 0x01)
-			if(positionFlag%2 == 0)
+			if(modFlag%4 == 0)
 		{
 			yFire2--;
 			xFire2--;
 		}
 		if((yFire2 == 0) || (xFire2 == 0)){
-			ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, Ash, 24, 26);
+			//ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, Ash, 24, 26);
 				yFire2 = 0;
 //			ObstaclePick = Random();
 //			ObstaclePick &= 0x01;
 			temp2Xf =Stage[currentStage].Obstacle1CoordX;
 			temp2Yf =Stage[currentStage].Obstacle1CoordY;
-			Stage[currentStage].Obstacle2CoordX = yFire2;
-			Stage[currentStage].Obstacle2CoordY = xFire2;
+//			Stage[currentStage].Obstacle2CoordX = yFire2;
+//			Stage[currentStage].Obstacle2CoordY = xFire2;
 			airPick2 = Random();
 			airPick2 &= 0x03;
 			tempExplode2 = 15;
@@ -1558,7 +1470,6 @@ void obstacleFire(void){
 			ST7735_DrawBitmap(temp2Xf, temp2Yf, Ash, 24, 26);
 			tempExplode2--;
 		}
-	//}
 	}
 }
 
@@ -1586,6 +1497,24 @@ void obstacleFire(void){
 			if (checkHitbox2(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
 				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
 				ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, pt2, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY); 
+				ST7735_SetRotation(1);
+				ST7735_SetCursor(8,2);
+				ST7735_OutString("GAME OVER\n");
+				ST7735_SetCursor(7,3);
+				ST7735_OutString("Press Reset\n");
+				ST7735_SetCursor(12,4);
+				ST7735_OutString("to\n");
+				ST7735_SetCursor(8,5);
+				ST7735_OutString("Play Again\n");
+				ST7735_SetRotation(0);
+				k = 1;
+			}
+		}
+		
+		void GameOver3(void){
+			if (checkHitbox3(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
+				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Fireball, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY); 
 				ST7735_SetRotation(1);
 				ST7735_SetCursor(8,2);
 				ST7735_OutString("GAME OVER\n");
@@ -1667,7 +1596,7 @@ uint8_t CheckTime(void){
 	
 	timePer = tellTime/n;
 	
-	if(timePer == 5){
+	if(timePer == 12){
 			currentStage++;
 			transitionFlag = 1;
 			n++;
@@ -1675,7 +1604,6 @@ uint8_t CheckTime(void){
 				currentStage = 0;
 			}
 	}
-	
 	return currentStage;
 }
 
@@ -1727,7 +1655,7 @@ void setTransitionCard(void){
 			DinoCoordinateX = 0;
 			DinoCoordinateY = 30;
 			ST7735_SetRotation(1);
-			ST7735_SetCursor(7,3);
+			ST7735_SetCursor(10,3);
 			ST7735_OutString("Run");
 			ST7735_SetRotation(0);
 		}
@@ -1735,7 +1663,7 @@ void setTransitionCard(void){
 			DinoCoordinateX = 85;
 			DinoCoordinateY = 80;
 			ST7735_SetRotation(1);
-			ST7735_SetCursor(7,3);
+			ST7735_SetCursor(10,3);
 			ST7735_OutString("Free Fall");
 			ST7735_SetRotation(0);
 		}
@@ -1743,7 +1671,7 @@ void setTransitionCard(void){
 			DinoCoordinateX = 0;
 			DinoCoordinateY = 30;
 			ST7735_SetRotation(1);
-			ST7735_SetCursor(7,3);
+			ST7735_SetCursor(10,3);
 			ST7735_OutString("Swim");
 			ST7735_SetRotation(0);
 		}
@@ -1751,7 +1679,7 @@ void setTransitionCard(void){
 			DinoCoordinateX = 0;
 			DinoCoordinateY = 30;
 			ST7735_SetRotation(1);
-			ST7735_SetCursor(7,3);
+			ST7735_SetCursor(10,3);
 			ST7735_OutString("Fire");
 			ST7735_SetRotation(0);
 		}
@@ -1775,7 +1703,7 @@ int main(void){
   Delay100ms(50);              // delay 5 sec at 80 MHz
   LCD_OutDec(1234);
 	Timer0_Init(&Score, 0x4C4B400);
-	
+	Sound_Init();
 	PortE_Init();
 	ADC_Init();
 	EnableInterrupts();
@@ -1783,32 +1711,18 @@ int main(void){
 	uint16_t runFlag = 0;
 	
 	GPIO_PORTE_DEN_R &= ~(0x04);
-	//uint16_t yC = 180;
 	
 //	ST7735_DrawBitmap(0, 27, Start, 24, 30);
 //	ST7735_DrawBitmap(158, 115, Dead, 26, 30);
 	
   int i = 0;
 	int j = 0;
-
-//	int slowJump = 0x00;
-////	int slowCactus=0x00;
-//	int jumpHeight;
-
-				DinoCoordinateX = 0;
-				DinoCoordinateY = Data;
+			DinoCoordinateX = 0;
+			DinoCoordinateY = Data;
 //------------------------------------------------------------------------
-	while(1 && k ==0
-		){
-		//CheckTime();
-		//Controls();
-//		Controls();
-//		Data = ADC_In();
-//		Data = Data/26;
-			
-			
+	while(1 && k ==0){
 			setTransitionCard();
-//			CheckTime();
+		//	CheckTime();
 //----------------------------------PE2---------------------------------
 			fireballInit();
 			fireballShoot();
@@ -1848,7 +1762,6 @@ int main(void){
 				}
 				DinoDimensionX = 26;
 				DinoDimensionY = 30;
-				//flo++;
 			}
 			
 
@@ -1858,35 +1771,23 @@ int main(void){
 //------------------------run-------------------------------------
 
 			 if (((GPIO_PORTE_DATA_R &= 0x01) == 0)&& (duckFlag ==0)){
-//					if((currentStage == groundFlag) || (currentStage == fireFlag)){
-//						DinoCoordinateX = 0;
-//						DinoCoordinateY = Data;
-//					}
 					if(currentStage == waterFlag){
 						DinoCoordinateX +=0;
 						DinoCoordinateY +=0;
 					}
-//					if(currentStage == airFlag){
-//						DinoCoordinateX =90;
-//						DinoCoordinateY =Data;
-//					}
 					if(positionFlag >100){
 						ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run1, 26, 30);
 					}
 					else{
 						ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Run2, 26, 30);
 					}
-				DinoDimensionX = 26;
-				DinoDimensionY = 30;
-//				DinoCoordinateX = 0;
-//				DinoCoordinateY = Data;
+					DinoDimensionX = 26;
+					DinoDimensionY = 30;
 			}
 			 
 			//------------water---------------------------------------------
 			else if(jumpingChecker() == 2){
-				
 				if( positionFlag%3 == 0){
-					
 					if(DinoCoordinateX<85){ /////top of screen
 						DinoCoordinateX = DinoCoordinateX+1;
 					}
@@ -1897,7 +1798,6 @@ int main(void){
 				else{
 					ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY , Run2, 26, 30);
 				}
-				//flo++;
 			}
 
 
@@ -1929,23 +1829,23 @@ int main(void){
 	//---------------------powerup---------------------
 			
 			
-			if(iconPick == 0){
+			if(iconPick == 0x01){
 				if((currentStage == groundFlag) || (currentStage == waterFlag)){
-				IconCoordY = q;
-				ST7735_DrawBitmap(IconCoordX, IconCoordY, IconF, IconDimenX, IconDimenY);
-				if(positionFlag%3 == 0){
-					q--;
 					IconCoordY = q;
+					ST7735_DrawBitmap(IconCoordX, IconCoordY, IconF, IconDimenX, IconDimenY);
+					if(modFlag%6 == 0){
+						q--;
+						IconCoordY = q;
+					}
+					if(q == 0){
+						q = 180;
+					}
 				}
-				if(q == 0){
-					q = 180;
-				}
-			}
 			if(currentStage == airFlag){
 				IconCoordX = f;
 				IconCoordY = 80;
 				ST7735_DrawBitmap(IconCoordX, IconCoordY, IconF, IconDimenX, IconDimenY);
-				if(positionFlag%3 == 0){
+				if(modFlag%6 == 0){
 					f++;
 					IconCoordX = f;
 				}
@@ -1955,16 +1855,16 @@ int main(void){
 			}
 			}
 			if((currentStage == groundFlag) || (currentStage == waterFlag)){
-			if(q == 180){
-				iconPick = Random();
-				iconPick &= 0x01;
-			}
+				if(q == 180){
+					iconPick = Random();
+					iconPick &= 0x03;
+				}
 			}
 			if(currentStage == airFlag){
-			if(f == 100){
-				iconPick = Random();
-				iconPick &= 0x01;
-			}
+				if(f == 100){
+					iconPick = Random();
+					iconPick &= 0x03;
+				}
 			}
 			
 			if(powerUpFlag == 1){
@@ -1973,35 +1873,27 @@ int main(void){
 			if(powerUpFlag == 0){
 				ST7735_FillRect(80, 10-10, IconDimenX+2, IconDimenY+2, 0xFFFF);
 			}
-//////////////////////////////////
-//			ST7735_DrawBitmap(0, yC, Cactus, 30, 24);
-//			Stage[currentStage].Obstacle1CoordX = 0;
-//			Stage[currentStage].Obstacle1CoordY = yC;
-//			slowCactus ^=0x01;
-//			if(slowCactus == 0x01)
-//			{
-//				yC--;
-//			}
-//			if(yC ==0){
-//					yC = 180;
-//			}
-//////////////////////////////////////
 //				Obstacle();
 			Obstacle(ObstacleP1(), ObstacleP2());
 			obstacleFire();
 //			GameOver1(ObstacleP1());
 //			GameOver2(ObstacleP2());
+//			GameOver3();
+			
 			i++;
 			j++;
 			positionFlag--;
+			modFlag--;
 			if(positionFlag == 0){
 				positionFlag = 200;
 			}
-//			if(k == 1){
-//				while(1){
-//					k = k+0;
-//				}
-//			}
+			if(modFlag == 0){
+				modFlag = 400;
+			}
+			if(tellTime%80 == 1){ /////-----------------------------------------------------
+				modFlag +=100;
+			}
+			
 	}
 }
 
