@@ -69,7 +69,7 @@ int jumpingTime = 0;
 int duckFlag = 0;
 int jumpFlag;
 	int y = 0;
-
+int restore;
 	int clear;
 		int k = 0;
 	int slowJump = 0x00;
@@ -1171,9 +1171,11 @@ void slideLeftRight(void){
 		Data = Data/26;
 		if(DinoCoordinateY>25){
 			DinoCoordinateY = Data;
+			DinoCoordinateX = 85;
 		}
 		if(DinoCoordinateY <= 25){
 			DinoCoordinateY = 26;
+			DinoCoordinateX = 85;
 		}
 		if(currentStage == airFlag){
 				DinoCoordinateX =85;
@@ -1217,7 +1219,7 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 			ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
 	//	slowCactus ^=0x01;
 	//	if(slowCactus == 0x01)
-			if(modFlag%4== 0)
+			if((modFlag+restore)%4== 0)
 			{
 				yC--;
 			}
@@ -1250,7 +1252,7 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 		//slowPter ^=0x01;
 //		if(slowPter == 0x01)
 		if (((ObstaclePick == 1) && ((currentStage == groundFlag) || (currentStage == waterFlag)))||(currentStage == waterFlag)){
-			if(modFlag%6 == 0)
+			if((modFlag+restore)%6 == 0)
 		{
 			yP--;
 		}
@@ -1287,7 +1289,7 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
 	//	slowCactus ^=0x01;
 	//	if(slowCactus == 0x01)
-		if(modFlag%6== 0)
+		if((modFlag+restore)%6== 0)
 		{
 			yCair++;
 		}
@@ -1317,7 +1319,7 @@ void Obstacle(unsigned short *pt1, unsigned short *pt2){
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, pt2, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
 	//	slowPter ^=0x01;
 //		if(slowPter == 0x01)
-			if(modFlag%4 == 0)
+			if((modFlag+restore)%4 == 0)
 		{
 			yPair++;
 		}
@@ -1411,7 +1413,7 @@ void obstacleFire(void){
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Fireball, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY);
 		slowCactus ^=0x01;
 	//	if(slowCactus == 0x01)
-		if(modFlag%6== 0)
+		if((modFlag+restore)%6== 0)
 		{
 			xFire1--;
 			yFire1--;
@@ -1459,7 +1461,7 @@ void obstacleFire(void){
 		ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, Fireball, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY);
 		slowPter ^=0x01;
 //		if(slowPter == 0x01)
-			if(modFlag%5 == 0)
+			if((modFlag+restore)%5 == 0)
 		{
 			yFire2--;
 			xFire2--;
@@ -1614,7 +1616,7 @@ uint8_t CheckTime(void){
 	
 	timePer = tellTime/n;
 	
-	if(timePer == 12){
+	if(timePer == 20){
 			currentStage++;
 			transitionFlag = 1;
 			n++;
@@ -1669,6 +1671,7 @@ void Delay100msblank(uint32_t count){uint32_t volatile time;
 void setTransitionCard(void){
 	if(transitionFlag == 1){
 		ST7735_FillScreen(0xFFFF); 
+		Delay100ms(5);
 		if(currentStage == groundFlag){
 			DinoCoordinateX = 0;
 			DinoCoordinateY = 30;
@@ -1679,7 +1682,7 @@ void setTransitionCard(void){
 		}
 		if(currentStage == airFlag){
 			DinoCoordinateX = 85;
-			DinoCoordinateY = 80;
+			DinoCoordinateY = 50;
 			ST7735_SetRotation(1);
 			ST7735_SetCursor(10,3);
 			ST7735_OutString("Free Fall");
@@ -1708,7 +1711,7 @@ void setTransitionCard(void){
 
 
 // *************************** Capture image dimensions out of BMP**********
-
+//int restore = 0;
 int main(void){
   TExaS_Init();  // set system clock to 80 MHz
 	Random_Init(NVIC_ST_CURRENT_R);
@@ -1740,7 +1743,7 @@ int main(void){
 //------------------------------------------------------------------------
 	while(1 && k ==0){
 			setTransitionCard();
-			//CheckTime();
+			CheckTime();
 //----------------------------------PE2---------------------------------
 			fireballInit();
 			fireballShoot();
@@ -1854,7 +1857,7 @@ int main(void){
 					IconCoordY = q;
 					IconCoordX = 70;
 					ST7735_DrawBitmap(IconCoordX, IconCoordY, IconF, IconDimenX, IconDimenY);
-					if(modFlag%6 == 0){
+					if((modFlag+restore)%6 == 0){
 						q--;
 						IconCoordY = q;
 					}
@@ -1869,7 +1872,7 @@ int main(void){
 				IconCoordX = f;
 				IconCoordY = 80;
 				ST7735_DrawBitmap(IconCoordX, IconCoordY, IconF, IconDimenX, IconDimenY);
-				if(modFlag%6 == 0){
+				if((modFlag+restore)%6 == 0){
 					f++;
 					IconCoordX = f;
 				}
@@ -1903,8 +1906,8 @@ int main(void){
 //				Obstacle();
 			Obstacle(ObstacleP1(), ObstacleP2());
 			obstacleFire();
-//			GameOver1(ObstacleP1());
-//			GameOver2(ObstacleP2());
+			GameOver1(ObstacleP1());
+			GameOver2(ObstacleP2());
 
 			
 			i++;
@@ -1918,7 +1921,7 @@ int main(void){
 				modFlag = 400;
 			}
 			if(tellTime%60 == 1){ /////-----------------------------------------------------
-				modFlag +=200;
+				restore +=100;
 			}
 			
 	}
