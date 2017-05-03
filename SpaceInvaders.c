@@ -905,7 +905,8 @@ int reloadFireball = 0;
 void fireballShoot(void){
 	int i = 0;
 	int j = 0;
-	while(i < numberOfFireballs){  //whileloop goes through all the fireballs, moving them by one pixel
+	while(i < numberOfFireballs){ 
+			Sound_FireballShoot();//whileloop goes through all the fireballs, moving them by one pixel
 		if((currentStage == groundFlag) || (currentStage == waterFlag)){
 		if(FireballCoordinateY < 200){ // fireballCoordinateY[i]
 			ST7735_DrawBitmap(FireballCoordinateX, FireballCoordinateY+1, Fireball, FireballDimensionX, FireballDimensionY); 
@@ -968,6 +969,7 @@ void fireballExplode1(void){
 	}
 //////////////////////////	
 			if(fireballHit>0){
+				Sound_Explosion();
 			ST7735_DrawBitmap(tempX, tempY, Ash, 24, 26);
 			slowAsh ^=0x01;
 			if(slowAsh == 0x01)
@@ -1000,6 +1002,7 @@ void fireballExplode2(void){
 	}
 //////////////////////////	
 			if(fireballHit>0){
+				Sound_Explosion();
 			ST7735_DrawBitmap(tempX, tempY, Ash, 24, 26);
 			slowAsh ^=0x01;
 			if(slowAsh == 0x01)
@@ -1485,6 +1488,7 @@ void obstacleFire(void){
 
 		void GameOver1( unsigned short *pt1){
 			if (checkHitbox1(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+				Sound_die();
 				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
 				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, pt1, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY); 
 				ST7735_SetRotation(1);
@@ -1503,6 +1507,7 @@ void obstacleFire(void){
 		
 		void GameOver2(unsigned short *pt2){
 			if (checkHitbox2(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+				Sound_die();
 				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
 				ST7735_DrawBitmap(Stage[currentStage].Obstacle2CoordX, Stage[currentStage].Obstacle2CoordY, pt2, Stage[currentStage].Obstacle2dimenX, Stage[currentStage].Obstacle2dimenY); 
 				ST7735_SetRotation(1);
@@ -1521,6 +1526,7 @@ void obstacleFire(void){
 		
 		void GameOver3(void){
 			if (checkHitbox3(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+				Sound_die();
 				ST7735_DrawBitmap(DinoCoordinateX, DinoCoordinateY, Dead, 26, 30);  
 				ST7735_DrawBitmap(Stage[currentStage].Obstacle1CoordX, Stage[currentStage].Obstacle1CoordY, Fireball, Stage[currentStage].Obstacle1dimenX, Stage[currentStage].Obstacle1dimenY); 
 				ST7735_SetRotation(1);
@@ -1547,6 +1553,7 @@ int powerUpTime = 0;
 		
 void getFirePower(void){
 	if(checkHitboxIcon(DinoDimensionX, DinoCoordinateX, DinoDimensionY, DinoCoordinateY) == 1){
+		Sound_powerup();
 		ST7735_FillRect(IconCoordX, IconCoordY-10, IconDimenX+2, IconDimenY+2, 0xFFFF);
 		q = 180;
 		f=0;
@@ -1884,8 +1891,8 @@ int main(void){
 //				Obstacle();
 			Obstacle(ObstacleP1(), ObstacleP2());
 			obstacleFire();
-//			GameOver1(ObstacleP1());
-//			GameOver2(ObstacleP2());
+			GameOver1(ObstacleP1());
+			GameOver2(ObstacleP2());
 //			GameOver3();
 			
 			i++;

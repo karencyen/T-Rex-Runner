@@ -19,18 +19,10 @@ void Sound_Fastinvader3(void);
 void Sound_Fastinvader4(void);
 void Sound_Highpitch(void);
 
-//void Sound_FireballShoot(void){
-//	Sound_Play(FireballShoot, 1821);
-//};
+void Sound_FireballShoot(void);
 
-//void Sound_powerup(void){
-//	Sound_Play(powerup, 11054);
-//};
-//void Sound_Explosion(void){
-//	Sound_Play(Explosion, 3600);
-//};
+void Sound_powerup(void);
+void Sound_Explosion(void);
 
 void Sound_Jumpp(void);
-//void Sound_die(void){
-//	Sound_Play(die,1988);
-//};
+void Sound_die(void);
